@@ -11,7 +11,7 @@ __all__ = ['select_df'] #__ __ python習慣用法
 
 def select_df(df: pd.DataFrame,
               column_drop: Optional[List[str]] = None,
-              year: int = 2000, #default 2000
+              year: int = 2000, #default 2000..
               save_path: Optional[Path] = None) -> pd.DataFrame:
     """
     TODO write by yourself xxx
