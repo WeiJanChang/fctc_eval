@@ -7,12 +7,24 @@ __all__=['select_df']
 def select_df(df: pd.DataFrame,
               column_drop:Optional[List[str]] = None,
               year: int=2000,
-              save_path: Optional[Path] = None) -> pd.DataFrame:
+              save_path: Optional[Path] = None),
+              drop_na: Optional[List[str]] = None)-> pd.DataFrame:
     """
-    define a function named select_df
+    dataframe modification and save as another file
+
+    :param df: input dataframe
+    :param column_drop: drop the column(s) that are not informative
+    :param year: pick up the data that larger than which year
+    :param save_path: path for saving the modified dataframe
+    :param drop_na: specify if drop the na-existing column name
+
+    :return:
+    """
+    
+    """
     預設沒有要drop掉column, 所以=None
-    因為Our World in Data collected since 2000, so year must greater than 2000
     """
+
     df = df.copy()
     """
     The copy() method returns a copy of the DataFrame.
@@ -42,7 +54,7 @@ def select_df(df: pd.DataFrame,
     # df 還是原本的樣子. subset = dop_na 是指定在要drop掉的位置上
         except KeyError as e:
             raise ValueError(f'{e} not in the dataframe, should be one of the {_df.columns.tolist()}')
-    # 如果輸入錯誤，就把其實沒有NA 的地方抓出並列表 f'' f-string 不用一直打 '''' 
+    # 如果輸入錯誤，就把其實沒有NA 的地方抓出並列表 f'' f-string 不用一直打 ''''
 
     if save_path is not None:
         _df.to_csv(save_path)
