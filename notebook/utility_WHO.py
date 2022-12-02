@@ -43,15 +43,13 @@ def select_df(df: pd.DataFrame,
 
     year_mask: pd.Series[bool] = df['Year'] > year
     # type is list of bool; 比較df["year"]有沒有> default 的year
-    entity_mask:List[bool]= [country in WHO_MEMBER_STATES for country in df['Entity']]
-    # 在df裡Entity 裡的country有沒有也在who member states 裡，有的就True.
-    _df: pd.DataFrame = df[year_mask & entity_mask].reset_index(drop=True)
 
+    df=df[year_mask].reset_index(drop=True)
     # 使用新的索引 df.reset_index; 把drop掉的也不要加進去新df裡(drop=True), ret=return
 
     if drop_na is not None:
         try:
-            _df.dropna(subset=drop_na, inplace=True)
+            df.dropna(subset=drop_na, inplace=True)
     # inplace = True, 是在執行完 _df.dropna()之後，會返回到 _dr.dropna 裡; 如果是inplace = false, 執行完_df.dropna 後
     # df 還是原本的樣子. subset = dop_na 是指定在要drop掉的位置上
         except KeyError as e:
@@ -59,6 +57,6 @@ def select_df(df: pd.DataFrame,
     # 如果輸入錯誤，就把其實沒有NA 的地方抓出並列表 f'' f-string 不用一直打 ''''
 
     if save_path is not None:
-        _df.to_csv(save_path)
+        df.to_csv(save_path)
 
-    return _df
+    return df
