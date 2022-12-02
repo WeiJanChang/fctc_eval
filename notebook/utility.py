@@ -41,7 +41,7 @@ def select_df(df: pd.DataFrame,
     """
 
 
-    year_mask: pd.Series[bool] = df['Year'] > year
+    year_mask: pd.Series[bool] = df['Year'] >= year
     # type is list of bool; 比較df["year"]有沒有> default 的year
     entity_mask:List[bool]= [country in WHO_MEMBER_STATES for country in df['Entity']]
     # 在df裡Entity 裡的country有沒有也在who member states 裡，有的就True.

@@ -7,8 +7,8 @@ __all__=['select_df']
 def select_df(df: pd.DataFrame,
               column_drop:Optional[List[str]] = None,
               year: int=2000,
-              save_path: Optional[Path] = None
-              ,drop_na: Optional[List[str]] = None)-> pd.DataFrame:
+              save_path: Optional[Path] = None,
+              drop_na: Optional[List[str]] = None)-> pd.DataFrame:
 
     """
     dataframe modification and save as another file
@@ -41,7 +41,7 @@ def select_df(df: pd.DataFrame,
     """
 
 
-    year_mask: pd.Series[bool] = df['Year'] > year
+    year_mask: pd.Series[bool] = df['Year'] >= year
     # type is list of bool; 比較df["year"]有沒有> default 的year
 
     df=df[year_mask].reset_index(drop=True)
