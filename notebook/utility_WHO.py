@@ -51,12 +51,22 @@ def select_df(df: pd.DataFrame,
         try:
             df.dropna(subset=drop_na, inplace=True)
     # inplace = True, 是在執行完 _df.dropna()之後，會返回到 _dr.dropna 裡; 如果是inplace = false, 執行完_df.dropna 後
-    # df 還是原本的樣子. subset = dop_na 是指定在要drop掉的位置上
+    # df 還是原本的樣子. subset = drop_na 是指定在要drop掉的位置上
         except KeyError as e:
             raise ValueError(f'{e} not in the dataframe, should be one of the {_df.columns.tolist()}')
     # 如果輸入錯誤，就把其實沒有NA 的地方抓出並列表 f'' f-string 不用一直打 ''''
-
+    df=df.rename(columns={'Country Name': 'Entity'})
     if save_path is not None:
         df.to_csv(save_path)
 
     return df
+
+
+def total_death (df: pd.DataFrame,
+                 save_path: Optional [Path] = None)-> pd.DataFrame:
+    df = df.copy()
+    df.insert("Total number of death", df['Number'] * 100 /df['Percentage of cause-specific deaths out of total deaths'])
+
+    return df
+
+
