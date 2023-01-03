@@ -1,18 +1,18 @@
 """
 pipeline
 ** df1(CVD Mortality):
-    header:Entity, Year, Sex, Total number of death, Death rate per 100,000 population,
+    header:Entity, Year, Sex, Age group code, Age Group, Number, Percentage of cause-specific deaths out of total deaths,
+    Total number of death, Death rate per 100,000 population,
     Total percentage of cause-specific deaths out of total deaths
 
 ** df2(Tobacco Use):
     header:Entity, Year, Prevalence of current tobacco use, males (% of male adults),
-    Prevalence of current tobacco use, females (% of male adults), Population (historical estimates)
+    Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
 
 
 ** combine
-1.
-2.
-3.
+1. horizontal to vertical in df1  and combine to df2
+2. if df has non value--> show Nan
 
 """
 import numpy as np
@@ -36,25 +36,68 @@ def preprocess_cvd(df: pd.DataFrame,
     :return:
         TODO
     """
-    # Sum of number of death in age groups
+    # Sum of number of death in each age group
     numbers = df['Number']
-    total_percentage = df['Percentage of cause-specific deaths out of total deaths']
-    df["Total number of death"] = numbers * 100 / total_percentage
+    percentage = df['Percentage of cause-specific deaths out of total deaths']
+    df["Total number of death"] = numbers * 100 / percentage
     total_number_of_death = df["Total number of death"]
     mask_nan = np.isnan(total_number_of_death)  # type: pd.Series[bool]
     total_number_of_death[mask_nan] = 0
     total_number_of_death = total_number_of_death.astype(int)  # astype can cast/change multiple types
+    # Total percentage of cause-specific deaths out of total deaths = Sum of number/ SUM of Total number of death * 100
+    # (Male/ Female/ All in each year and country, Calculate every 15 columns)
 
-    print(type(total_number_of_death[0]))
+    # mask_nan = np.isnan(total_percentage)  # type: pd.Series[bool]
+    # total_percentage[mask_nan] = 0
 
-    print(df[:5].to_markdown())
+    # print(type(total_number_of_death[0]))
+    #
+    # print(df[:30].to_markdown())
 
     if save:
         pass
-    # pass : 不要理他
+    # pass : ignore it
+    return df
+
+
+def create_age_grouping(df: pd.DataFrame,
+                        save: bool = True) -> pd.DataFrame:
+    """
+
+    :param df: df after preprocess_cvd
+    :param save:
+    :return:
+    """
+    numbers = df['Number']
+    try:
+        total_number_of_death = df["Total number of death"]
+    except KeyError:
+        raise RuntimeError('call preprocess_cvd in advance')
+
+    df['Total percentage of CVD deaths'] = (numbers.rolling(
+        15).sum() / total_number_of_death.rolling(15).sum()) * 100
+
+#    entity_list = df['Entity'].unique()
+#    year_list = df['Year'].unique()
+#    sex_list = df['Sex'].unique()
+#    for entity in entity_list:
+#        for year in year_list:
+#            for sex in sex_list:
+#                mask_a = df['Entity'] == entity
+#                mask_b = df['Year'] == year
+#                mask_c = df['Sex'] == sex
+
+#                mask_all = mask_a & mask_b & mask_c
+
+#                print(df[mask_all].shape[0])
+
+
+
 
 
 if __name__ == '__main__':
     df = pd.read_excel(
         '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/WHO_Cardiovascular_Disease_Mortality_specific_year_Age_over15.xlsx')
-    preprocess_cvd(df)
+    df = preprocess_cvd(df)
+    create_age_grouping(df)
+
