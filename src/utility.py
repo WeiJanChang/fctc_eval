@@ -1,14 +1,14 @@
 from pathlib import Path
 from typing import Optional, List
 import pandas as pd
-from who_member_states import WHO_MEMBER_STATES
+from src.who_member_states import WHO_MEMBER_STATES
 
 __all__=['select_df']
 def select_df(df: pd.DataFrame,
               column_drop:Optional[List[str]] = None,
               year: int=2000,
-              save_path: Optional[Path] = None,
-              drop_na: Optional[List[str]] = None)-> pd.DataFrame:
+              save_path: Optional[Path] = None
+              ,drop_na: Optional[List[str]] = None)-> pd.DataFrame:
 
     """
     dataframe modification and save as another file
@@ -43,30 +43,22 @@ def select_df(df: pd.DataFrame,
 
     year_mask: pd.Series[bool] = df['Year'] >= year
     # type is list of bool; 比較df["year"]有沒有> default 的year
+    entity_mask:List[bool]= [country in WHO_MEMBER_STATES for country in df['Entity']]
+    # 在df裡Entity 裡的country有沒有也在who member states 裡，有的就True.
+    _df: pd.DataFrame = df[year_mask & entity_mask].reset_index(drop=True)
 
-    df=df[year_mask].reset_index(drop=True)
     # 使用新的索引 df.reset_index; 把drop掉的也不要加進去新df裡(drop=True), ret=return
 
     if drop_na is not None:
         try:
-            df.dropna(subset=drop_na, inplace=True)
+            _df.dropna(subset=drop_na, inplace=True)
     # inplace = True, 是在執行完 _df.dropna()之後，會返回到 _dr.dropna 裡; 如果是inplace = false, 執行完_df.dropna 後
-    # df 還是原本的樣子. subset = drop_na 是指定在要drop掉的位置上
+    # df 還是原本的樣子. subset = dop_na 是指定在要drop掉的位置上
         except KeyError as e:
             raise ValueError(f'{e} not in the dataframe, should be one of the {_df.columns.tolist()}')
     # 如果輸入錯誤，就把其實沒有NA 的地方抓出並列表 f'' f-string 不用一直打 ''''
-    df=df.rename(columns={'Country Name': 'Entity'})
+
     if save_path is not None:
-        df.to_csv(save_path)
+        _df.to_csv(save_path)
 
-    return df
-
-
-def total_death (df: pd.DataFrame,
-                 save_path: Optional [Path] = None)-> pd.DataFrame:
-    df = df.copy()
-    df.insert("Total number of death", df['Number'] * 100 /df['Percentage of cause-specific deaths out of total deaths'])
-
-    return df
-
-
+    return _df
