@@ -1,6 +1,8 @@
-from pathlib import Path  # pathlib: module, Path: class. Checking if a path exist
+from pathlib import Path # pathlib: module, Path: class. Checking if a path exist
+
 from typing import Optional, List, Dict  # typing: support for type hint
 import pandas as pd
+import numpy as np
 from who_member_states import WHO_MEMBER_STATES
 
 __all__ = ['select_df']  # only import 'select_df'
@@ -42,8 +44,10 @@ def select_df(df: pd.DataFrame,
     # year_mask and entity_mask. df.reset_index(drop = True) means new index created, old index don't added in new df.
 
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
+        _df = _df.mask(_df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
         try:
             _df.dropna(subset=drop_na, inplace=True)
+            _df.dropna(subset=['Age Group'], inplace=True)
         # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace = False,
         # df will still show the initial one. subset = drop_na means drop in specific place you set.
         except KeyError as e:
