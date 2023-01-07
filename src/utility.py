@@ -1,5 +1,5 @@
 from pathlib import Path  # pathlib: module, Path: class. Checking if a path exist
-from typing import Optional, List  # typing: support for type hint
+from typing import Optional, List, Dict  # typing: support for type hint
 import pandas as pd
 from who_member_states import WHO_MEMBER_STATES
 
@@ -7,7 +7,7 @@ __all__ = ['select_df']  # only import 'select_df'
 
 
 def select_df(df: pd.DataFrame,
-              rename: Optional[List[str]] = None,
+              rename_mapping: Dict[str, str] = None,
               column_drop: Optional[List[str]] = None,  # column_drop (param) is an optional list of string. Optional
               # type is from Typing. default is None (no drop any column). If provide column_drop, must be ['xxx'] (
               # list of string)
@@ -17,7 +17,7 @@ def select_df(df: pd.DataFrame,
     """
     dataframe modification and save as another file
 
-    :param rename: both df have countries but the header is different
+    :param rename_mapping: both df have countries but the header is different
     :param df: input dataframe
     :param column_drop: drop the column(s) that are not informative
     :param year: pick up the data that larger than which year
@@ -28,8 +28,9 @@ def select_df(df: pd.DataFrame,
 
     df = df.copy()  # The copy() method returns a copy of the DataFrame. By default, the copy is a "deep copy"
     # meaning that any changes  made in the original DataFrame will NOT be reflected in the copy. 新跑出來的df不會影響最原始的df
-    if rename is not None:
-        df = df.rename(columns={'Country Name': 'Entity'})
+
+    if rename_mapping is not None:
+        df = df.rename(columns=rename_mapping)
     if column_drop is not None:  # if drop specific column,df need to drop the option
         df = df.drop(columns=column_drop)  # df 的column = column after drop, column_drop: Optional[List[str]]
 
@@ -49,6 +50,6 @@ def select_df(df: pd.DataFrame,
             raise ValueError(f'{e} not in the dataframe, should be one of the {_df.columns.tolist()}')  # If
             # typed wrong, show the list which should be dropped.
     if save_path is not None:
-        _df.to_csv(save_path)
+        _df.to_csv(Path)
 
     return _df
