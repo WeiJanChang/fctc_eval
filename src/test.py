@@ -115,10 +115,12 @@ new_df = create_age_grouping(df)  # assign a new_df after create_age_grouping
 
 """
 pipeline
-** df (Final_WHO_CVD_Mortality.xlsx):
+** df1 (Final_WHO_CVD_Mortality.xlsx):
     Change layout.
     Sex (All, Female, and Male) combined to header(Number/ Tot Num/ Tot %) respectively
     Left only a unique year in col.
+** df2 (Tobacco use.xlsx):
+    Combine with df1 and show NaN if some values are empty, don't drop
 """
 
 
@@ -128,7 +130,7 @@ def modified_cvd(df: pd.DataFrame,
 
     :param df: Use new_df ( Final_WHO_CVD_Mortality.xlsx) to modify column, add new col. and change position.
     :param save_path: modified dataframe to another excel file
-    :return:
+    :return: df
     """
 
 
