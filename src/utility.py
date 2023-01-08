@@ -174,5 +174,3 @@ df = pd.read_excel(
     engine='openpyxl')
 df = preprocess_cvd(df)
 new_df = create_age_grouping(df)
-
-# todo: combine df1 and df2

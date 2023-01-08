@@ -12,7 +12,7 @@ pipeline
 
 ** combine
 1. horizontal to vertical in df1  and combine to df2
-2. if df has non value--> show Nan
+2. if df has non value--> show Nan (don't drop)
 
 """
 import collections  # This module contains different datatype to process the data: dict, list, set, and tuple.
@@ -112,4 +112,40 @@ if __name__ == '__main__':
 
 df = preprocess_cvd(df)  # assign a df after preprocess_cvd
 new_df = create_age_grouping(df)  # assign a new_df after create_age_grouping
-print(new_df)
+
+"""
+pipeline
+** df (Final_WHO_CVD_Mortality.xlsx):
+    Change layout.
+    Sex (All, Female, and Male) combined to header(Number/ Tot Num/ Tot %) respectively
+    Left only a unique year in col.
+"""
+
+
+def modified_cvd(df: pd.DataFrame,
+                 save_path: Optional[Path] = None) -> pd.DataFrame:
+    """
+
+    :param df: Use new_df ( Final_WHO_CVD_Mortality.xlsx) to modify column, add new col. and change position.
+    :param save_path: modified dataframe to another excel file
+    :return:
+    """
+
+
+df2 = pd.DataFrame(columns=['Entity', 'Year', 'All_number', 'Female_number', 'Male_number', 'All_total number of death',
+                            'Female_total number of death', 'Male_total number of death', 'All_total percentage of CVD',
+                            'Female_total percentage of CVD', 'Male_total percentage of CVD'])
+df2['Entity'] = new_df['Entity']
+df2['Year'] = new_df['Year']
+df2['All_number'] = new_df[new_df['Sex'] == 'All']['Number']
+df2['Female_number'] = new_df[new_df['Sex'] == 'Female']['Number']
+df2['Male_number'] = new_df[new_df['Sex'] == 'Male']['Number']
+df2['All_total number of death'] = new_df[new_df['Sex'] == 'All']['Total number of death']
+df2['Female_total number of death'] = new_df[new_df['Sex'] == 'Female']['Total number of death']
+df2['Male_total number of death'] = new_df[new_df['Sex'] == 'Male']['Total number of death']
+df2['All_total percentage of CVD'] = new_df[new_df['Sex'] == 'All']['Total percentage of CVD']
+df2['Female_total percentage of CVD'] = new_df[new_df['Sex'] == 'Female']['Total percentage of CVD']
+df2['Male_total percentage of CVD'] = new_df[new_df['Sex'] == 'Male']['Total percentage of CVD']
+df2.reset_index(drop=True, inplace=True)
+
+df2.to_excel('df2_test.xlsx')
