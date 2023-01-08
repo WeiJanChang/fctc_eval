@@ -1,10 +1,12 @@
 """
 pipeline
 ** df1(CVD Mortality):
-    header:Entity, Year, Sex, Age group code, Age Group, Number, Percentage of cause-specific deaths out of total deaths,
+    This .xlsx processed via utility.py
+    header:Entity, Year, Sex, Age Group, Number, Percentage of cause-specific deaths out of total deaths,
     Death rate per 100,000 population
 
 ** df2(Tobacco Use):
+    This .xlsx processed via utility.py
     header:Entity, Year, Prevalence of current tobacco use, males (% of male adults),
     Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
 
@@ -92,6 +94,8 @@ def create_age_grouping(df: pd.DataFrame,
     numbers = group['Number']
     total_number_of_death = group['Total number of death']
     # noinspection PyTypeChecker
+    dy['Number'] = np.array(numbers.sum())
+    dy['Total number of death'] = np.array(total_number_of_death.sum())
     dy['Total percentage of CVD'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
 
     new_df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
@@ -103,7 +107,7 @@ def create_age_grouping(df: pd.DataFrame,
 if __name__ == '__main__':
     df = pd.read_excel(
         '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH '
-        'Dissertation/WHO_Cardiovascular_Disease_Mortality_specific_year_Age_over15.xlsx',
+        'Dissertation/WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx',
         engine='openpyxl')  # “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
 
 df = preprocess_cvd(df)  # assign a df after preprocess_cvd
