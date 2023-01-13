@@ -19,7 +19,7 @@ import collections  # This module contains different datatype to process the dat
 from pprint import pprint
 # pprint.pprint() can use when you need to examine the structure of a large or complex data structure. this output
 # reveals more readable and structured way.
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -99,6 +99,7 @@ def create_age_grouping(df: pd.DataFrame,
     dy['Total percentage of CVD'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
 
     new_df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
+
     if save:
         new_df.to_excel('WHO_CVD_Mortality_test.xlsx')
     return new_df
@@ -123,16 +124,13 @@ pipeline
     Combine with df1 and show NaN if some values are empty, don't drop
 """
 
-
-def modified_cvd(df: pd.DataFrame,
-                 save_path: Optional[Path] = None) -> pd.DataFrame:
-    """
+# todo: def modified_cvd(df: pd.DataFrame, save_path: Optional[Path] = None) -> pd.DataFrame:
+"""
 
     :param df: Use new_df ( Final_WHO_CVD_Mortality.xlsx) to modify column, add new col. and change position.
     :param save_path: modified dataframe to another excel file
     :return: df
-    """
-
+"""
 
 df2 = pd.DataFrame(columns=['Entity', 'Year', 'All_number', 'Female_number', 'Male_number', 'All_total number of death',
                             'Female_total number of death', 'Male_total number of death', 'All_total percentage of CVD',
@@ -151,3 +149,14 @@ df2['Male_total percentage of CVD'] = new_df[new_df['Sex'] == 'Male']['Total per
 df2.reset_index(drop=True, inplace=True)
 
 df2.to_excel('df2_test.xlsx')
+
+# merge test
+df1 = pd.read_excel(
+    "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
+df2 = pd.read_excel(
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
+merged_df = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
+merged_df.fillna(value='NaN', inplace=True)
+merged_df.to_excel('merged_test.xlsx', index=False)
+
+# todo: 把沒有同時符合entity, year符合的也要列出來
