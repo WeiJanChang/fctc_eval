@@ -1,3 +1,67 @@
+"""
+pipeline
+
+MPH Thesis: To Investigate the effects of tobacco control treaty on cardiovascular disease mortality in males and females
+between Parties and Nonparties of the World Health Organization (WHO) Framework Convention on Tobacco Control (FCTC)
+
+Step 1: Download raw data from open access database
+        a. df1 = WHO Mortality database
+        https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases
+        b. df2 = Our World in Data
+        https://ourworldindata.org/smoking#smoking-by-gender
+
+Step 2: select df2['Entity'] which in WHO member states.
+
+Step 3: select the info I need and drop info I don't need.
+
+        df1: Region Name, Year (>=2000), Sex (All, Females, Males), Age Group(>=15 y/o), Number,
+        Percentage of cause-specific deaths out of total deaths, Death rate per 100,000 population
+        drop : Country Code, Region Code, Region Name, Age-standardized death rate per 100 000 standard population,
+        Unnamed: 12.
+
+        df2: Entity, Year, Prevalence of current tobacco use, males (% of male adults),
+        Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
+        drop: Continent, Code
+
+Step 4: drop na from the remaining column.
+        save it to modified_df
+
+Step 5: finished the final version of Tobacco Use (df2). Next step is to do some calculations on df1
+
+Step 6: df1:
+        calculate 'sum of the number of death in a specific year in All/ Females/Males age-specific, respectively.'
+        calculate 'Total number of Death (Not only the death of CVD) in a specific year in All/ Females/Males
+        age-specific, respectively.'
+        formula:percentage of cause-specific deaths out of total deaths =
+                Number of deaths from a specific cause / Number of total deaths) x 100
+
+Step 7: df1:
+        calculate 'Total percentage of CVD deaths out of total deaths = Sum of the number/ Sum of the Total number of
+        death * 100' (All/Females/Males in each year and country; no age-specific)
+
+Step 8: df1:
+        age grouping: each age groups --> one age group (>= 15 y/o)
+        create a new df: groupby ['Entity','Year', 'Sex']
+        and added new col: ['Number'], ['Total number of death'],['Total percentage of CVD']
+        save it to excel
+
+Step 9: df1:
+        change layout.
+        Sex (All, Female, and Male) combined to header(Number/ Tot Num/ Tot %) respectively
+        Left only a unique year in col.
+
+Step 10:
+        ** df1(CVD Mortality):
+        Header: Entity, Year, Sex, Number, Total Number of death, Total percentage of CVD
+
+        ** df2(Tobacco Use):
+        Header: Entity, Year, Prevalence of current tobacco use, males (% of male adults),
+        Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
+
+        merge df1 and df2, show NaN if some values are empty, don't drop
+        save it to excel
+"""
+
 from pathlib import Path  # pathlib: module, Path: class. Checking if a path exist
 from typing import Optional, List, Dict, Tuple  # typing: support for type hint
 import pandas as pd
@@ -23,8 +87,8 @@ def select_df(df: pd.DataFrame,
     """
     dataframe modification and save as another file
 
-    :param rename_mapping: both df have countries but the header is different
     :param df: input dataframe
+    :param rename_mapping: both df have countries but the header is different
     :param column_drop: drop the column(s) that are not informative
     :param year: pick up the data that larger than which year
     :param save_path: path for saving the modified dataframe
@@ -44,42 +108,24 @@ def select_df(df: pd.DataFrame,
     # default year (year: int = 2000)
     entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in df['Entity']]  # check countries whether
     # in df['Entity'] also in WHO_MEMBER_STATES. If Yes =True
-    _df: pd.DataFrame = df[year_mask & entity_mask].reset_index(drop=True)  # create a new df that only meet both
+    modified_df: pd.DataFrame = df[year_mask & entity_mask].reset_index(
+        drop=True)  # create a new df that only meet both
     # year_mask and entity_mask. df.reset_index(drop = True) means new index created, old index don't added in new df.
 
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
-        _df = _df.mask(_df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
+        modified_df = _df.mask(_df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
         try:
-            _df.dropna(subset=drop_na, inplace=True)
-            _df.dropna(subset=['Age Group'], inplace=True)
+            modified_df.dropna(subset=drop_na, inplace=True)
+            modified_df.dropna(subset=['Age Group'], inplace=True)
         # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace = False,
         # df will still show the initial one. subset = drop_na means drop in specific place you set.
         except KeyError as e:
             raise ValueError(f'{e} not in the dataframe, should be one of the {_df.columns.tolist()}')  # If
             # typed wrong, show the list which should be dropped.
     if save_path is not None:
-        _df.to_csv(Path)
+        modified_df.to_csv(Path)
 
-    return _df
-
-
-"""
-pipeline
-** df1(CVD Mortality):
-    This WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx processed via utility.py
-    Header:Entity, Year, Sex, Age Group, Number, Percentage of cause-specific deaths out of total deaths,
-    Death rate per 100,000 population
-
-** df2(Tobacco Use):
-    This Tobacco_use_in_WHO_MEMBER_STATES.xlsx processed via utility.py
-    Header:Entity, Year, Prevalence of current tobacco use, males (% of male adults),
-    Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
-
-** combine df1 and df2
-1. horizontal to vertical in df1  and combine to df2
-2. if df has non value--> show Nan
-
-"""
+    return modified_df
 
 
 def preprocess_cvd(df: pd.DataFrame,
@@ -154,6 +200,27 @@ def create_age_grouping(df: pd.DataFrame,
     return new_df
 
 
+def merge_df(df1: pd.DataFrame,
+             df2: pd.DataFrame,
+             based_on: Optional[List[str]] = None,
+             save_path: Optional[Path] = None) -> pd.DataFrame:
+    """
+
+    :param df1: Final_WHO_CVD_Mortality_modified.xlsx
+    :param df2: Tobacco_use_in_WHO_MEMBER_STATES.xlsx
+    :param based_on: based on Entity and Year to combine to dataframe
+    :param save_path: save combined dataframe to excel
+    :return: merge_df
+    """
+    if based_on is not None:
+        merge_df = pd.merge(df1, df2, on=based_on, how='outer')
+        merge_df.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
+        # value in df. 'Nan' can changed what you want to instead of.
+    if save_path is not None:
+        merge_df.to_excel('merged_test.xlsx', index=False)  # don't show index in excel
+    return merge_df
+
+
 if __name__ == '__main__':
     df = pd.read_csv(
         '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/raw '
@@ -175,3 +242,11 @@ df = pd.read_excel(
 df = preprocess_cvd(df)
 new_df = create_age_grouping(df)
 print(new_df)
+
+df1 = pd.read_excel(
+    "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
+df2 = pd.read_excel(
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
+based_on = ['Entity', 'Year']
+save_path = 'merged_test.xlsx'
+merge_df = merge_df(df1, df2, based_on, save_path)
