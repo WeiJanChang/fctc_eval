@@ -15,12 +15,12 @@ pipeline
 2. if df has non value--> show Nan (don't drop)
 
 """
+from pathlib import Path
 import collections  # This module contains different datatype to process the data: dict, list, set, and tuple.
 from pprint import pprint
 # pprint.pprint() can use when you need to examine the structure of a large or complex data structure. this output
 # reveals more readable and structured way.
 from typing import Tuple, List, Optional
-
 import numpy as np
 import pandas as pd
 
@@ -150,13 +150,26 @@ df2.reset_index(drop=True, inplace=True)
 
 df2.to_excel('df2_test.xlsx')
 
+
 # merge test
+
+def merge_df(df1: pd.DataFrame,
+             df2: pd.DataFrame,
+             based_on: Optional[List[str]] = None,
+             save_path: Optional[Path] = None) -> pd.DataFrame:
+    if based_on is not None:
+        merge_df = pd.merge(df1, df2, on=based_on, how='outer')
+        merge_df.fillna(value='NaN', inplace=True)
+    if save_path is not None:
+        merge_df.to_excel('merged_test.xlsx', index=False)
+    return merge_df
+
+
 df1 = pd.read_excel(
     "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
 df2 = pd.read_excel(
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
-merged_df = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
-merged_df.fillna(value='NaN', inplace=True)
-merged_df.to_excel('merged_test.xlsx', index=False)
-
-# todo: 把沒有同時符合entity, year符合的也要列出來
+based_on = ['Entity', 'Year']
+save_path = 'merged_test.xlsx'
+merge_df = merge_df(df1, df2, based_on, save_path)
+# print(merge_df)
