@@ -1,20 +1,3 @@
-"""
-pipeline
-** df1(CVD Mortality):
-    This .xlsx processed via utility.py
-    header:Entity, Year, Sex, Age Group, Number, Percentage of cause-specific deaths out of total deaths,
-    Death rate per 100,000 population
-
-** df2(Tobacco Use):
-    This .xlsx processed via utility.py
-    header:Entity, Year, Prevalence of current tobacco use, males (% of male adults),
-    Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
-
-** combine
-1. horizontal to vertical in df1  and combine to df2
-2. if df has non value--> show Nan (don't drop)
-
-"""
 from pathlib import Path
 import collections  # This module contains different datatype to process the data: dict, list, set, and tuple.
 from pprint import pprint
@@ -114,16 +97,6 @@ if __name__ == '__main__':
 df = preprocess_cvd(df)  # assign a df after preprocess_cvd
 new_df = create_age_grouping(df)  # assign a new_df after create_age_grouping
 
-"""
-pipeline
-** df1 (Final_WHO_CVD_Mortality.xlsx):
-    Change layout.
-    Sex (All, Female, and Male) combined to header(Number/ Tot Num/ Tot %) respectively
-    Left only a unique year in col.
-** df2 (Tobacco use.xlsx):
-    Combine with df1 and show NaN if some values are empty, don't drop
-"""
-
 # todo: def modified_cvd(df: pd.DataFrame, save_path: Optional[Path] = None) -> pd.DataFrame:
 """
 
@@ -132,44 +105,28 @@ pipeline
     :return: df
 """
 
-df2 = pd.DataFrame(columns=['Entity', 'Year', 'All_number', 'Female_number', 'Male_number', 'All_total number of death',
-                            'Female_total number of death', 'Male_total number of death', 'All_total percentage of CVD',
-                            'Female_total percentage of CVD', 'Male_total percentage of CVD'])
-df2['Entity'] = new_df['Entity']
-df2['Year'] = new_df['Year']
-df2['All_number'] = new_df[new_df['Sex'] == 'All']['Number']
-df2['Female_number'] = new_df[new_df['Sex'] == 'Female']['Number']
-df2['Male_number'] = new_df[new_df['Sex'] == 'Male']['Number']
-df2['All_total number of death'] = new_df[new_df['Sex'] == 'All']['Total number of death']
-df2['Female_total number of death'] = new_df[new_df['Sex'] == 'Female']['Total number of death']
-df2['Male_total number of death'] = new_df[new_df['Sex'] == 'Male']['Total number of death']
-df2['All_total percentage of CVD'] = new_df[new_df['Sex'] == 'All']['Total percentage of CVD']
-df2['Female_total percentage of CVD'] = new_df[new_df['Sex'] == 'Female']['Total percentage of CVD']
-df2['Male_total percentage of CVD'] = new_df[new_df['Sex'] == 'Male']['Total percentage of CVD']
+sex_values = ['All', 'Female', 'Male']
+df2 = new_df.assign(
+    All_number=new_df.query("Sex == 'All'")['Number'],
+    Female_number=new_df.query("Sex == 'Female'")['Number'],
+    Male_number=new_df.query("Sex == 'Male'")['Number'],
+    All_total_number_of_death=new_df.query("Sex == 'All'")['Total number of death'],
+    Female_total_number_of_death=new_df.query("Sex == 'Female'")['Total number of death'],
+    Male_total_number_of_death=new_df.query("Sex == 'Male'")['Total number of death'],
+    All_total_percentage_of_CVD=new_df.query("Sex == 'All'")['Total percentage of CVD'],
+    Female_total_percentage_of_CVD=new_df.query("Sex == 'Female'")['Total percentage of CVD'],
+    Male_total_percentage_of_CVD=new_df.query("Sex == 'Male'")['Total percentage of CVD'])
 df2.reset_index(drop=True, inplace=True)
 
 df2.to_excel('df2_test.xlsx')
 
-
-# merge test
-
-def merge_df(df1: pd.DataFrame,
-             df2: pd.DataFrame,
-             based_on: Optional[List[str]] = None,
-             save_path: Optional[Path] = None) -> pd.DataFrame:
-    if based_on is not None:
-        merge_df = pd.merge(df1, df2, on=based_on, how='outer')
-        merge_df.fillna(value='NaN', inplace=True)
-    if save_path is not None:
-        merge_df.to_excel('merged_test.xlsx', index=False)
-    return merge_df
-
+# merge df1 & df2 test
 
 df1 = pd.read_excel(
     "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
 df2 = pd.read_excel(
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
-based_on = ['Entity', 'Year']
-save_path = 'merged_test.xlsx'
-merge_df = merge_df(df1, df2, based_on, save_path)
-# print(merge_df)
+merge_df = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
+merge_df.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
+# value in df. 'Nan' can changed what you want to instead of.
+print(merge_df)

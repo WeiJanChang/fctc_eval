@@ -1,8 +1,9 @@
 """
 pipeline
 
-MPH Thesis: To Investigate the effects of tobacco control treaty on cardiovascular disease mortality in males and females
-between Parties and Nonparties of the World Health Organization (WHO) Framework Convention on Tobacco Control (FCTC)
+MPH Thesis: To Investigate the effects of tobacco control treaty on cardiovascular disease mortality in males and
+            females between Parties and Nonparties of the World Health Organization (WHO) Framework Convention on
+            Tobacco Control (FCTC)
 
 Step 1: Download raw data from open access database
         a. df1 = WHO Mortality database
@@ -113,7 +114,7 @@ def select_df(df: pd.DataFrame,
     # year_mask and entity_mask. df.reset_index(drop = True) means new index created, old index don't added in new df.
 
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
-        modified_df = _df.mask(_df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
+        modified_df = modified_df.mask(modified_df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
         try:
             modified_df.dropna(subset=drop_na, inplace=True)
             modified_df.dropna(subset=['Age Group'], inplace=True)
@@ -195,30 +196,10 @@ def create_age_grouping(df: pd.DataFrame,
     dy['Total percentage of CVD'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
 
     new_df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
+
     if save:
         new_df.to_excel('Final_WHO_CVD_Mortality.xlsx')
     return new_df
-
-
-def merge_df(df1: pd.DataFrame,
-             df2: pd.DataFrame,
-             based_on: Optional[List[str]] = None,
-             save_path: Optional[Path] = None) -> pd.DataFrame:
-    """
-
-    :param df1: Final_WHO_CVD_Mortality_modified.xlsx
-    :param df2: Tobacco_use_in_WHO_MEMBER_STATES.xlsx
-    :param based_on: based on Entity and Year to combine to dataframe
-    :param save_path: save combined dataframe to excel
-    :return: merge_df
-    """
-    if based_on is not None:
-        merge_df = pd.merge(df1, df2, on=based_on, how='outer')
-        merge_df.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
-        # value in df. 'Nan' can changed what you want to instead of.
-    if save_path is not None:
-        merge_df.to_excel('merged_test.xlsx', index=False)  # don't show index in excel
-    return merge_df
 
 
 if __name__ == '__main__':
@@ -241,12 +222,27 @@ df = pd.read_excel(
     engine='openpyxl')
 df = preprocess_cvd(df)
 new_df = create_age_grouping(df)
-print(new_df)
+
+sex_values = ['All', 'Female', 'Male']
+df2 = new_df.assign(
+    All_number=new_df.query("Sex == 'All'")['Number'],
+    Female_number=new_df.query("Sex == 'Female'")['Number'],
+    Male_number=new_df.query("Sex == 'Male'")['Number'],
+    All_total_number_of_death=new_df.query("Sex == 'All'")['Total number of death'],
+    Female_total_number_of_death=new_df.query("Sex == 'Female'")['Total number of death'],
+    Male_total_number_of_death=new_df.query("Sex == 'Male'")['Total number of death'],
+    All_total_percentage_of_CVD=new_df.query("Sex == 'All'")['Total percentage of CVD'],
+    Female_total_percentage_of_CVD=new_df.query("Sex == 'Female'")['Total percentage of CVD'],
+    Male_total_percentage_of_CVD=new_df.query("Sex == 'Male'")['Total percentage of CVD'])
+df2.reset_index(drop=True, inplace=True)
+# merge df1 & df2 test
 
 df1 = pd.read_excel(
     "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
 df2 = pd.read_excel(
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
-based_on = ['Entity', 'Year']
-save_path = 'merged_test.xlsx'
-merge_df = merge_df(df1, df2, based_on, save_path)
+
+cvd_tobacco = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
+cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
+# value in df. 'Nan' can changed what you want to instead of.
+cvd_tobacco.to_excel('Merge_CVD_∩_Tobacco.xlsx')
