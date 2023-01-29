@@ -114,11 +114,9 @@ def select_df(df: pd.DataFrame,
     # year_mask and entity_mask. df.reset_index(drop = True) means new index created, old index don't added in new df.
 
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
-        modified_df = modified_df.mask(modified_df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
         try:
             modified_df.dropna(subset=drop_na, inplace=True)
-            modified_df.dropna(subset=['Age Group'], inplace=True)
-        # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace = False,
+            # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace = False,
         # df will still show the initial one. subset = drop_na means drop in specific place you set.
         except KeyError as e:
             raise ValueError(f'{e} not in the dataframe, should be one of the {modified_df.columns.tolist()}')  # If
@@ -130,6 +128,7 @@ def select_df(df: pd.DataFrame,
 
 
 def preprocess_cvd(df: pd.DataFrame,
+                   drop_na: Optional[List[str]] = None,
                    save_path: Optional[Path] = None) -> pd.DataFrame:
     """
     Dataframe of WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx need to modify:
@@ -138,6 +137,7 @@ def preprocess_cvd(df: pd.DataFrame,
     - save as another dataframe
 
     :param df: input dataframe (WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx)
+    :param drop_na: drop Age_Group <15 year-old
     :param save_path: save modified dataframe to another excel
     :return: df
     """
@@ -154,6 +154,9 @@ def preprocess_cvd(df: pd.DataFrame,
     # from a DataFrame
     df['Total number of death'] = df['Total number of death'].astype(int)  # astype can cast/change multiple types (
     # change type to int)
+    if drop_na is not None:  # drop rows with missing values ('NaN') from df
+        df = df.mask(df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
+        df.dropna(subset=['Age Group'], inplace=True)
 
     if save_path is not None:
         df.to_excel(Path)
@@ -161,7 +164,7 @@ def preprocess_cvd(df: pd.DataFrame,
 
 
 def create_age_grouping(df: pd.DataFrame,
-                        save: bool = True) -> pd.DataFrame:
+                        save: Optional[Path] = None) -> pd.DataFrame:
     """
     Calculate: Total percentage of CVD of total deaths = Sum of number/ Sum of Total number of
     death * 100 (Male/ Female/ All in each year and country)
@@ -211,40 +214,47 @@ def create_age_grouping(df: pd.DataFrame,
         Male_total_percentage_of_CVD=_df.query("Sex == 'Male'")['Total percentage of CVD'])
     new_df.reset_index(drop=True, inplace=True)
 
-    new_df = new_df.drop(['Sex', 'Number', 'Total number of death', 'Total percentage of CVD'], axis=1)
+    new_df = new_df.drop(['Sex', 'Number', 'Total number of death', 'Total percentage of CVD'],
+                         axis=1)  # axis = 1: specifies to drop columns
 
-    new_df = new_df.groupby(['Entity', 'Year']).first().reset_index()
+    new_df = new_df.groupby(['Entity', 'Year']).first().reset_index()  # The first method is then applied to
+    # the grouped dataframe, which returns the first row of each group
     if save:
-        new_df.to_excel('Final_WHO_CVD_Mortality.xlsx')
+        new_df.to_excel(Path)
     return new_df
 
 
 if __name__ == '__main__':
-    df = pd.read_csv(
+    raw_who_cvd_df = pd.read_csv(
         '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/raw '
         'data/WHO_Cardiovascular_Disease_Mortality_Database.csv')
+    rename = {'Country Name': 'Entity'}
+    column_drop = ['Age group code', 'Country Code', 'Region Name', 'Region Code',
+                   'Age-standardized death rate per 100 000 standard population', 'Unnamed: 12']
+    na_header = ['Number',
+                 'Percentage of cause-specific deaths out of total deaths',
+                 'Death rate per 100 000 population']
+    who_cvd_df = select_df(raw_who_cvd_df, rename_mapping=rename, column_drop=column_drop, drop_na=na_header)
 
-rename = {'Country Name': 'Entity'}
-column_drop = ['Age group code', 'Country Code', 'Region Name', 'Region Code',
-               'Age-standardized death rate per 100 000 standard population', 'Unnamed: 12']
-na_header = ['Number',
-             'Percentage of cause-specific deaths out of total deaths',
-             'Death rate per 100 000 population']
+    raw_tobacco_df = pd.read_csv(
+        "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/raw "
+        "data/Prevalence_of_current_tobacco_use_between_Males_and_Females.csv")
+    column_drop = ['Code', 'Continent']
+    na_header = ['Prevalence of current tobacco use, males (% of male adults)',
+                 'Prevalence of current tobacco use, females (% of female adults)']
+    tobacco_df = select_df(raw_tobacco_df, column_drop=column_drop, drop_na=na_header)
 
-df = select_df(df, rename_mapping=rename, column_drop=column_drop, drop_na=na_header)
-
-df = pd.read_excel(
+who_cvd_df = pd.read_excel(
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH '
     'Dissertation/WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx',
-    engine='openpyxl')
-df = preprocess_cvd(df)
-new_df = create_age_grouping(df)
+    engine='openpyxl')  # “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
+
+who_cvd_df = preprocess_cvd(who_cvd_df)  # assign a who_cvd_df after preprocess_cvd
+new_df = create_age_grouping(who_cvd_df)  # assign a new_df after create_age_grouping
 
 # merge df1 & df2 test
-df1 = pd.read_excel(
-    "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
-df2 = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
+df1 = new_df
+df2 = tobacco_df
 
 cvd_tobacco = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
 cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
