@@ -14,7 +14,7 @@ def preprocess_cvd(df: pd.DataFrame,
                    save: bool = True) -> pd.DataFrame:
     """
     Dataframe of WHO_CVD_mortality modify:
-    - grouping if set kwarg `grouping_age` as true todo: kwarg?
+    - grouping if set kwarg `grouping_age` as true
     - Calculate total number of death
     - Calculate Total percentage of cause-specific deaths out of total deaths (%) =
     Sum of number of ALL n Males n Females/Sum of total number of death of ALL n Males n Females * 100
@@ -42,7 +42,7 @@ def preprocess_cvd(df: pd.DataFrame,
     # print(df[:30].to_markdown())
 
     if save:
-        df.to_excel('test.xlsx')
+        df.to_excel
     return df
 
 
@@ -82,9 +82,10 @@ def create_age_grouping(df: pd.DataFrame,
     dy['Total percentage of CVD'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
 
     new_df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
+    new_df = pd.pivot_table(new_df, index=('Entity', 'Year'), columns='Sex')
 
     if save:
-        new_df.to_excel('WHO_CVD_Mortality_test.xlsx')
+        new_df.to_excel('pivot_test.xlsx')
     return new_df
 
 
@@ -92,41 +93,7 @@ if __name__ == '__main__':
     df = pd.read_excel(
         '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH '
         'Dissertation/WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx',
-        engine='openpyxl')  # “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
+        engine='openpyxl')
+df = preprocess_cvd(df)
+new_df = create_age_grouping(df)
 
-df = preprocess_cvd(df)  # assign a df after preprocess_cvd
-new_df = create_age_grouping(df)  # assign a new_df after create_age_grouping
-
-# todo: def modified_cvd(df: pd.DataFrame, save_path: Optional[Path] = None) -> pd.DataFrame:
-"""
-
-    :param df: Use new_df ( Final_WHO_CVD_Mortality.xlsx) to modify column, add new col. and change position.
-    :param save_path: modified dataframe to another excel file
-    :return: df
-"""
-
-sex_values = ['All', 'Female', 'Male']
-df2 = new_df.assign(
-    All_number=new_df.query("Sex == 'All'")['Number'],
-    Female_number=new_df.query("Sex == 'Female'")['Number'],
-    Male_number=new_df.query("Sex == 'Male'")['Number'],
-    All_total_number_of_death=new_df.query("Sex == 'All'")['Total number of death'],
-    Female_total_number_of_death=new_df.query("Sex == 'Female'")['Total number of death'],
-    Male_total_number_of_death=new_df.query("Sex == 'Male'")['Total number of death'],
-    All_total_percentage_of_CVD=new_df.query("Sex == 'All'")['Total percentage of CVD'],
-    Female_total_percentage_of_CVD=new_df.query("Sex == 'Female'")['Total percentage of CVD'],
-    Male_total_percentage_of_CVD=new_df.query("Sex == 'Male'")['Total percentage of CVD'])
-df2.reset_index(drop=True, inplace=True)
-
-df2.to_excel('df2_test.xlsx')
-
-# merge df1 & df2 test
-
-df1 = pd.read_excel(
-    "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
-df2 = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Tobacco_use_in_WHO_MEMBER_STATES.xlsx')
-merge_df = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
-merge_df.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
-# value in df. 'Nan' can changed what you want to instead of.
-print(merge_df)
