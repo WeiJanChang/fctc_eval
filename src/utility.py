@@ -121,7 +121,7 @@ def select_df(df: pd.DataFrame,
         # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace = False,
         # df will still show the initial one. subset = drop_na means drop in specific place you set.
         except KeyError as e:
-            raise ValueError(f'{e} not in the dataframe, should be one of the {_df.columns.tolist()}')  # If
+            raise ValueError(f'{e} not in the dataframe, should be one of the {modified_df.columns.tolist()}')  # If
             # typed wrong, show the list which should be dropped.
     if save_path is not None:
         modified_df.to_csv(Path)
@@ -133,7 +133,7 @@ def preprocess_cvd(df: pd.DataFrame,
                    save_path: Optional[Path] = None) -> pd.DataFrame:
     """
     Dataframe of WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx need to modify:
-    - grouping if set kwarg `grouping_age` as true todo: kwarg?
+    - grouping if set kwarg `grouping_age` as true  # kwarg : keyword arguments
     - Calculate Total number of death
     - save as another dataframe
 
@@ -195,8 +195,25 @@ def create_age_grouping(df: pd.DataFrame,
     dy['Total number of death'] = np.array(total_number_of_death.sum())
     dy['Total percentage of CVD'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
 
-    new_df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
+    _df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
 
+    # change layout
+    sex_values = ['All', 'Female', 'Male']
+    new_df = _df.assign(
+        All_number=_df.query("Sex == 'All'")['Number'],
+        Female_number=_df.query("Sex == 'Female'")['Number'],
+        Male_number=_df.query("Sex == 'Male'")['Number'],
+        All_total_number_of_death=_df.query("Sex == 'All'")['Total number of death'],
+        Female_total_number_of_death=_df.query("Sex == 'Female'")['Total number of death'],
+        Male_total_number_of_death=_df.query("Sex == 'Male'")['Total number of death'],
+        All_total_percentage_of_CVD=_df.query("Sex == 'All'")['Total percentage of CVD'],
+        Female_total_percentage_of_CVD=_df.query("Sex == 'Female'")['Total percentage of CVD'],
+        Male_total_percentage_of_CVD=_df.query("Sex == 'Male'")['Total percentage of CVD'])
+    new_df.reset_index(drop=True, inplace=True)
+
+    new_df = new_df.drop(['Sex', 'Number', 'Total number of death', 'Total percentage of CVD'], axis=1)
+
+    new_df = new_df.groupby(['Entity', 'Year']).first().reset_index()
     if save:
         new_df.to_excel('Final_WHO_CVD_Mortality.xlsx')
     return new_df
@@ -223,20 +240,7 @@ df = pd.read_excel(
 df = preprocess_cvd(df)
 new_df = create_age_grouping(df)
 
-sex_values = ['All', 'Female', 'Male']
-df2 = new_df.assign(
-    All_number=new_df.query("Sex == 'All'")['Number'],
-    Female_number=new_df.query("Sex == 'Female'")['Number'],
-    Male_number=new_df.query("Sex == 'Male'")['Number'],
-    All_total_number_of_death=new_df.query("Sex == 'All'")['Total number of death'],
-    Female_total_number_of_death=new_df.query("Sex == 'Female'")['Total number of death'],
-    Male_total_number_of_death=new_df.query("Sex == 'Male'")['Total number of death'],
-    All_total_percentage_of_CVD=new_df.query("Sex == 'All'")['Total percentage of CVD'],
-    Female_total_percentage_of_CVD=new_df.query("Sex == 'Female'")['Total percentage of CVD'],
-    Male_total_percentage_of_CVD=new_df.query("Sex == 'Male'")['Total percentage of CVD'])
-df2.reset_index(drop=True, inplace=True)
 # merge df1 & df2 test
-
 df1 = pd.read_excel(
     "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/Final_WHO_CVD_Mortality_modified.xlsx")
 df2 = pd.read_excel(
