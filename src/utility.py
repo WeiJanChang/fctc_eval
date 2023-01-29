@@ -226,7 +226,7 @@ def create_age_grouping(df: pd.DataFrame,
 
 if __name__ == '__main__':
     raw_who_cvd_df = pd.read_csv(
-        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/raw '
+        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw '
         'data/WHO_Cardiovascular_Disease_Mortality_Database.csv')
     rename = {'Country Name': 'Entity'}
     column_drop = ['Age group code', 'Country Code', 'Region Name', 'Region Code',
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     who_cvd_df = select_df(raw_who_cvd_df, rename_mapping=rename, column_drop=column_drop, drop_na=na_header)
 
     raw_tobacco_df = pd.read_csv(
-        "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH Dissertation/raw "
+        "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw "
         "data/Prevalence_of_current_tobacco_use_between_Males_and_Females.csv")
     column_drop = ['Code', 'Continent']
     na_header = ['Prevalence of current tobacco use, males (% of male adults)',
@@ -245,9 +245,8 @@ if __name__ == '__main__':
     tobacco_df = select_df(raw_tobacco_df, column_drop=column_drop, drop_na=na_header)
 
 who_cvd_df = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/MPH '
-    'Dissertation/WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx',
-    engine='openpyxl')  # “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
+    '/Users/wei/Python/MPHDissertation/test_file/WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx', engine='openpyxl')
+# “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
 
 who_cvd_df = preprocess_cvd(who_cvd_df)  # assign a who_cvd_df after preprocess_cvd
 new_df = create_age_grouping(who_cvd_df)  # assign a new_df after create_age_grouping
