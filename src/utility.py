@@ -258,4 +258,4 @@ df2 = tobacco_df
 cvd_tobacco = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
 cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
 # value in df. 'Nan' can changed what you want to instead of.
-cvd_tobacco.to_excel('Merge_CVD_∩_Tobacco.xlsx')
+cvd_tobacco.to_excel('Merge_CVD_Tobacco.xlsx')
