@@ -72,6 +72,7 @@ from pprint import pprint  # pprint.pprint() can use when you need to examine th
 # data structure. this output reveals more readable and structured way.
 from who_member_states import WHO_MEMBER_STATES
 
+
 __all__ = ['select_df']  # only import 'select_df'
 
 
@@ -107,7 +108,7 @@ def select_df(df: pd.DataFrame,
 
     year_mask: pd.Series[bool] = df['Year'] >= year  # type is list of bool; compared df["year"] whether larger than
     # default year (year: int = 2000)
-    entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in df['Entity']]  # check countries whether
+    entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in df['Country Name']]  # check countries whether
     # in df['Entity'] also in WHO_MEMBER_STATES. If Yes =True
     modified_df: pd.DataFrame = df[year_mask & entity_mask].reset_index(
         drop=True)  # create a new df that only meet both
@@ -116,13 +117,13 @@ def select_df(df: pd.DataFrame,
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
         try:
             modified_df.dropna(subset=drop_na, inplace=True)
-            # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace = False,
-        # df will still show the initial one. subset = drop_na means drop in specific place you set.
+            # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace =
+            # False, df will still show the initial one. subset = drop_na means drop in specific place you set.
         except KeyError as e:
             raise ValueError(f'{e} not in the dataframe, should be one of the {modified_df.columns.tolist()}')  # If
             # typed wrong, show the list which should be dropped.
     if save_path is not None:
-        modified_df.to_csv(Path)
+        modified_df.to_excel(save_path)
 
     return modified_df
 
@@ -131,12 +132,13 @@ def preprocess_cvd(df: pd.DataFrame,
                    drop_na: Optional[List[str]] = None,
                    save_path: Optional[Path] = None) -> pd.DataFrame:
     """
-    Dataframe of WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx need to modify:
+    Dataframe of WHO_Cardiovascular_Disease_Mortality_Database.xlsx need to modify:
     - grouping if set kwarg `grouping_age` as true  # kwarg : keyword arguments
     - Calculate Total number of death
+    - only left age >15 years old
     - save as another dataframe
 
-    :param df: input dataframe (WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx)
+    :param df: input dataframe (WHO_Cardiovascular_Disease_Mortality_Database.xlsx)
     :param drop_na: drop Age_Group <15 year-old
     :param save_path: save modified dataframe to another excel
     :return: df
@@ -145,29 +147,29 @@ def preprocess_cvd(df: pd.DataFrame,
     # Sum of number of death in each age group
     numbers = df['Number']
     percentage = df['Percentage of cause-specific deaths out of total deaths']
-    df["Total number of death"] = numbers * 100 / percentage
-    total_number_of_death = df["Total number of death"]
+    df["Total Number of Cause-Specific Deaths"] = numbers * 100 / percentage
+    total_number_of_death = df["Total Number of Cause-Specific Deaths"]
     mask_nan = np.isnan(total_number_of_death)  # type: pd.Series[bool] # if value is NaN, NaN = True
 
-    df.loc[mask_nan, 'Total number of death'] = 0  # search location of df. if index ('Total number of death') is
+    df.loc[
+        mask_nan, "Total Number of Cause-Specific Deaths"] = 0  # search location of df. if index ('Total number of death') is
     # NaN, change NaN to 0. ( if no.loc :SettingWithCopyWarning: A value is trying to be set on a copy of a slice
     # from a DataFrame
-    df['Total number of death'] = df['Total number of death'].astype(int)  # astype can cast/change multiple types (
+    df["Total Number of Cause-Specific Deaths"] = df["Total Number of Cause-Specific Deaths"].astype(
+        int)  # astype can cast/change multiple types (
     # change type to int)
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
         df = df.mask(df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
         df.dropna(subset=['Age Group'], inplace=True)
 
     if save_path is not None:
-        df.to_excel(Path)
+        df.to_excel(save_path)
     return df
-
-
 def create_age_grouping(df: pd.DataFrame,
-                        save: Optional[Path] = None) -> pd.DataFrame:
+                        save_path: Optional[Path] = None) -> pd.DataFrame:
     """
-    Calculate: Total percentage of CVD of total deaths = Sum of number/ Sum of Total number of
-    death * 100 (Male/ Female/ All in each year and country)
+    Calculate: Total percentage of CVD of total deaths = Sum of number/ Sum of Total number of cause-specific deaths
+    * 100 (Male/ Female/ All in each year and country)
     grouping_age: Age groups --> one age group (greater 15 y/o)
     create a new df and save it to excel
 
@@ -176,86 +178,94 @@ def create_age_grouping(df: pd.DataFrame,
     :return: new df
     """
 
-    if 'Total number of death' not in df.columns:
+    if 'Total Number of Cause-Specific Deaths' not in df.columns:
         raise RuntimeError('call preprocess_cvd in advance')
 
     dy: dict = collections.defaultdict(list)  # defaultdict object in collections. datatype will be dict. Using list
     # as the default_factory to group a sequence of key-value pairs into a dictionary of lists
-    group = df.groupby(['Entity', 'Year', 'Sex'])
+    group = df.groupby(['Region Code','Region Name','Country Code','Country Name', 'Year', 'Sex'])
     info: List[Tuple] = list(group.groups.keys())  # List[Tuple]: value is a list of tuple[()].looking for the keys in a
     # dict. The 'groups' attribute of the 'groupby' object is always dic type
 
     for i, it in enumerate(info):  # i = index ( starting from 0) , it = item (Entity, Year, Sex). enumerate can pair
         # index and item
-        dy['Entity'].append(it[0])  # Entity in [0]
-        dy['Year'].append(it[1])  # Year in [1]
-        dy['Sex'].append(it[2])  # Sex in [2]
+        dy['Region Code'].append(it[0])
+        dy['Region Name'].append(it[1])
+        dy['Country Code'].append(it[2])
+        dy['Country Name'].append(it[3])
+        dy['Year'].append(it[4])  # Year in [4]
+        dy['Sex'].append(it[5])  # Sex in [5]
 
     numbers = group['Number']
-    total_number_of_death = group['Total number of death']
+    total_number_of_death = group['Total Number of Cause-Specific Deaths']
     # noinspection PyTypeChecker todo: wt is it?
     dy['Number'] = np.array(numbers.sum())
-    dy['Total number of death'] = np.array(total_number_of_death.sum())
-    dy['Total percentage of CVD'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
+    dy['Total Number of Cause-Specific Deaths'] = np.array(total_number_of_death .sum())
+    dy['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
 
     _df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
 
     # change layout
     sex_values = ['All', 'Female', 'Male']
     new_df = _df.assign(
-        All_number=_df.query("Sex == 'All'")['Number'],
-        Female_number=_df.query("Sex == 'Female'")['Number'],
-        Male_number=_df.query("Sex == 'Male'")['Number'],
-        All_total_number_of_death=_df.query("Sex == 'All'")['Total number of death'],
-        Female_total_number_of_death=_df.query("Sex == 'Female'")['Total number of death'],
-        Male_total_number_of_death=_df.query("Sex == 'Male'")['Total number of death'],
-        All_total_percentage_of_CVD=_df.query("Sex == 'All'")['Total percentage of CVD'],
-        Female_total_percentage_of_CVD=_df.query("Sex == 'Female'")['Total percentage of CVD'],
-        Male_total_percentage_of_CVD=_df.query("Sex == 'Male'")['Total percentage of CVD'])
+        All_Number=_df.query("Sex == 'All'")['Number'],
+        Female_Number=_df.query("Sex == 'Female'")['Number'],
+        Male_Number=_df.query("Sex == 'Male'")['Number'],
+        All_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'All'")['Total Number of Cause-Specific Deaths'],
+        Female_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Female'")['Total Number of Cause-Specific Deaths'],
+        Male_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Male'")['Total Number of Cause-Specific Deaths'],
+        All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'All'")['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
+        Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Female'")['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
+        Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Male'")['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'])
     new_df.reset_index(drop=True, inplace=True)
 
-    new_df = new_df.drop(['Sex', 'Number', 'Total number of death', 'Total percentage of CVD'],
+    new_df = new_df.drop(['Sex', 'Number', 'Total Number of Cause-Specific Deaths', 'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
                          axis=1)  # axis = 1: specifies to drop columns
 
-    new_df = new_df.groupby(['Entity', 'Year']).first().reset_index()  # The first method is then applied to
+    new_df = new_df.groupby(['Region Code','Region Name','Country Code','Country Name', 'Year']).first().reset_index()  # The first method is then applied to
     # the grouped dataframe, which returns the first row of each group
-    if save:
-        new_df.to_excel(Path)
+    if save_path:
+        new_df.to_excel(save_path)
     return new_df
 
-
 if __name__ == '__main__':
-    raw_who_cvd_df = pd.read_csv(
-        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw '
-        'data/WHO_Cardiovascular_Disease_Mortality_Database.csv')
-    rename = {'Country Name': 'Entity'}
-    column_drop = ['Age group code', 'Country Code', 'Region Name', 'Region Code',
-                   'Age-standardized death rate per 100 000 standard population', 'Unnamed: 12']
-    na_header = ['Number',
-                 'Percentage of cause-specific deaths out of total deaths',
-                 'Death rate per 100 000 population']
-    who_cvd_df = select_df(raw_who_cvd_df, rename_mapping=rename, column_drop=column_drop, drop_na=na_header)
+    raw_who_cvd_df = pd.read_csv('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw '
+                                 'data/WHOMortalityDatabase_Deaths_sex_age_a_country_area_year-Cardiovascular '
+                                 'diseases_7th February 2023.csv')
+column_drop = ['Age group code', 'Unnamed: 12']
+na_header = ['Number',
+             'Percentage of cause-specific deaths out of total deaths',
+             'Death rate per 100 000 population']
+save_path = (
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+who_cvd_df = select_df(raw_who_cvd_df, column_drop=column_drop, drop_na=na_header,
+                       save_path=save_path)
+who_cvd_df= pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+# “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
+drop_na =['Age Group']
+save_path=('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+who_cvd_df_preprocess = preprocess_cvd(who_cvd_df,drop_na= drop_na,save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
 
-    raw_tobacco_df = pd.read_csv(
+who_cvd_df_preprocess = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+who_cvd_df_preprocess= preprocess_cvd(who_cvd_df_preprocess)
+save_path = ('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+new_df = create_age_grouping(who_cvd_df_preprocess,save_path=save_path)
+
+raw_tobacco_df = pd.read_csv(
         "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw "
         "data/Prevalence_of_current_tobacco_use_between_Males_and_Females.csv")
-    column_drop = ['Code', 'Continent']
-    na_header = ['Prevalence of current tobacco use, males (% of male adults)',
-                 'Prevalence of current tobacco use, females (% of female adults)']
-    tobacco_df = select_df(raw_tobacco_df, column_drop=column_drop, drop_na=na_header)
-
-who_cvd_df = pd.read_excel(
-    '/Users/wei/Python/MPHDissertation/test_file/WHO_CVD_Mortality_Age over 15_Year over 2000.xlsx', engine='openpyxl')
-# “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
-
-who_cvd_df = preprocess_cvd(who_cvd_df)  # assign a who_cvd_df after preprocess_cvd
-new_df = create_age_grouping(who_cvd_df)  # assign a new_df after create_age_grouping
+rename= {'Entity':'Country Name','Code':'Country Code'}
+na_header = ['Prevalence of current tobacco use, males (% of male adults)',
+             'Prevalence of current tobacco use, females (% of female adults)']
+col_drop=['Continent']
+save_path = ('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/Prevalence of Tobacco use.xlsx')
+tobacco_df = select_df(raw_tobacco_df,rename_mapping = rename,column_drop=col_drop, drop_na=na_header,save_path=save_path)
 
 # merge df1 & df2 test
 df1 = new_df
 df2 = tobacco_df
 
-cvd_tobacco = pd.merge(df1, df2, on=['Entity', 'Year'], how='outer')
-cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original
-# value in df. 'Nan' can changed what you want to instead of.
-cvd_tobacco.to_excel('Merge_CVD_Tobacco.xlsx')
+cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year'], how='outer')
+cvd_tobacco.fillna(value='NaN', inplace=True) # inplace = True means that 'value = 'NaN'' will inplace original value in df. 'Nan' can changed what you want to instead of.
+cvd_tobacco.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/merge_cvd_tobacco.xlsx')
+
