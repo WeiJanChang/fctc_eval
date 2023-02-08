@@ -1,28 +1,29 @@
 """
 pipeline
 
-MPH Thesis: To Investigate the effects of tobacco control treaty on cardiovascular disease mortality in males and
-            females between Parties and Nonparties of the World Health Organization (WHO) Framework Convention on
-            Tobacco Control (FCTC)
+MPH Thesis: To compare the relationship between the prevalence of tobacco and CVD mortality before and after the
+implementation of a tobacco treaty in WHO FCTC ratified parties by gender
 
 Step 1: Download raw data from open access database
         a. df1 = WHO Mortality database
         https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases
-        b. df2 = Our World in Data
-        https://ourworldindata.org/smoking#smoking-by-gender
+        b. df2 = WHO The Global Health Observatory
+        https://www.who.int/data/gho/data/themes/topics/sdg-target-3_a-tobacco-control
 
-Step 2: select df2['Entity'] which in WHO member states.
+Step 2:
 
 Step 3: select the info I need and drop info I don't need.
+        df1 (raw data): ['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex', 'Age group code', 'Age Group', 'Number', 'Percentage of cause-specific deaths out of total deaths', 'Age-standardized death rate per 100 000 standard population', 'Death rate per 100 000 population', 'Unnamed: 12']
+        **114 (297066, 13)**
 
-        df1: Region Name, Year (>=2000), Sex (All, Females, Males), Age Group(>=15 y/o), Number,
-        Percentage of cause-specific deaths out of total deaths, Death rate per 100,000 population
-        drop : Country Code, Region Code, Region Name, Age-standardized death rate per 100 000 standard population,
-        Unnamed: 12.
+        df1 (after select): ['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex', 'Age Group', 'Number', 'Percentage of cause-specific deaths out of total deaths', 'Age-standardized death rate per 100 000 standard population', 'Death rate per 100 000 population']
+        **111 (111401, 11)**
 
-        df2: Entity, Year, Prevalence of current tobacco use, males (% of male adults),
-        Prevalence of current tobacco use, females (% of female adults), Population (historical estimates)
-        drop: Continent, Code
+        df2(raw data): ['Location', 'Period', 'Indicator', 'Dim1', 'First Tooltip']
+        **165 (9351, 5)**
+
+        df2 (after select and rename):['Country Name', 'Year', 'Indicator', 'Sex', 'Prevalence']
+        **165 (9351, 5)**
 
 Step 4: drop na from the remaining column.
         save it to modified_df
@@ -72,7 +73,6 @@ from pprint import pprint  # pprint.pprint() can use when you need to examine th
 # data structure. this output reveals more readable and structured way.
 from who_member_states import WHO_MEMBER_STATES
 
-
 __all__ = ['select_df']  # only import 'select_df'
 
 
@@ -108,9 +108,10 @@ def select_df(df: pd.DataFrame,
 
     year_mask: pd.Series[bool] = df['Year'] >= year  # type is list of bool; compared df["year"] whether larger than
     # default year (year: int = 2000)
-    entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in df['Country Name']]  # check countries whether
+#    entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in
+#                              df['Country Name']]  # check countries whether
     # in df['Entity'] also in WHO_MEMBER_STATES. If Yes =True
-    modified_df: pd.DataFrame = df[year_mask & entity_mask].reset_index(
+    modified_df: pd.DataFrame = df[year_mask].reset_index(
         drop=True)  # create a new df that only meet both
     # year_mask and entity_mask. df.reset_index(drop = True) means new index created, old index don't added in new df.
 
@@ -165,6 +166,8 @@ def preprocess_cvd(df: pd.DataFrame,
     if save_path is not None:
         df.to_excel(save_path)
     return df
+
+
 def create_age_grouping(df: pd.DataFrame,
                         save_path: Optional[Path] = None) -> pd.DataFrame:
     """
@@ -183,7 +186,7 @@ def create_age_grouping(df: pd.DataFrame,
 
     dy: dict = collections.defaultdict(list)  # defaultdict object in collections. datatype will be dict. Using list
     # as the default_factory to group a sequence of key-value pairs into a dictionary of lists
-    group = df.groupby(['Region Code','Region Name','Country Code','Country Name', 'Year', 'Sex'])
+    group = df.groupby(['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex'])
     info: List[Tuple] = list(group.groups.keys())  # List[Tuple]: value is a list of tuple[()].looking for the keys in a
     # dict. The 'groups' attribute of the 'groupby' object is always dic type
 
@@ -200,8 +203,9 @@ def create_age_grouping(df: pd.DataFrame,
     total_number_of_death = group['Total Number of Cause-Specific Deaths']
     # noinspection PyTypeChecker todo: wt is it?
     dy['Number'] = np.array(numbers.sum())
-    dy['Total Number of Cause-Specific Deaths'] = np.array(total_number_of_death .sum())
-    dy['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'] = np.array(numbers.sum() / total_number_of_death.sum() * 100)
+    dy['Total Number of Cause-Specific Deaths'] = np.array(total_number_of_death.sum())
+    dy['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'] = np.array(
+        numbers.sum() / total_number_of_death.sum() * 100)
 
     _df = pd.DataFrame.from_dict(dy)  # creates a new_df from the dy dictionary.
 
@@ -212,21 +216,77 @@ def create_age_grouping(df: pd.DataFrame,
         Female_Number=_df.query("Sex == 'Female'")['Number'],
         Male_Number=_df.query("Sex == 'Male'")['Number'],
         All_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'All'")['Total Number of Cause-Specific Deaths'],
-        Female_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Female'")['Total Number of Cause-Specific Deaths'],
+        Female_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Female'")[
+            'Total Number of Cause-Specific Deaths'],
         Male_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Male'")['Total Number of Cause-Specific Deaths'],
-        All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'All'")['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
-        Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Female'")['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
-        Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Male'")['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'])
+        All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'All'")[
+            'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
+        Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Female'")[
+            'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
+        Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Male'")[
+            'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'])
     new_df.reset_index(drop=True, inplace=True)
 
-    new_df = new_df.drop(['Sex', 'Number', 'Total Number of Cause-Specific Deaths', 'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
+    new_df = new_df.drop(['Sex', 'Number', 'Total Number of Cause-Specific Deaths',
+                          'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
                          axis=1)  # axis = 1: specifies to drop columns
 
-    new_df = new_df.groupby(['Region Code','Region Name','Country Code','Country Name', 'Year']).first().reset_index()  # The first method is then applied to
+    new_df = new_df.groupby(['Region Code', 'Region Name', 'Country Code', 'Country Name',
+                             'Year']).first().reset_index()  # The first method is then applied to
     # the grouped dataframe, which returns the first row of each group
     if save_path:
         new_df.to_excel(save_path)
     return new_df
+
+
+def tobacco_layout_modified(df: pd.DataFrame,
+                            save_path: Optional[Path] = None) -> pd.DataFrame:
+    dy: dict = collections.defaultdict(list)
+    group = df.groupby(['Country Name', 'Year', 'Indicator', 'Sex'])
+    info: List[Tuple] = list(group.groups.keys())
+
+    for i, it in enumerate(info):
+        dy['Country Name'].append(it[0])
+        dy['Year'].append(it[1])
+        dy['Indicator'].append(it[2])
+        dy['Sex'].append(it[3])
+        dy['Prevalence'].append(group.get_group(it).Prevalence.mean())
+
+    _df = pd.DataFrame.from_dict(dy)
+    sex_values = ['Both sexes', 'Male', 'Female']
+    indicator_values = ['Estimate of current tobacco use prevalence (%) (age-standardized rate)',
+                        'Estimate of current tobacco smoking prevalence (%) (age-standardized rate)']
+
+    changed_df = _df.assign(
+        All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Both sexes'& Indicator =='Estimate of current tobacco use prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+        Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Male'& Indicator =='Estimate of current tobacco use prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+        Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Female'& Indicator =='Estimate of current tobacco use prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+
+        All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Both sexes'& Indicator =='Estimate of current tobacco smoking prevalence (%) (age-standardized "
+            "rate)'")['Prevalence'],
+        Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Male'& Indicator =='Estimate of current tobacco smoking prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+        Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Female'& Indicator =='Estimate of current tobacco smoking prevalence (%) (age-standardized rate)'")[
+            'Prevalence'])
+
+    changed_df.reset_index(drop=True, inplace=True)
+
+    changed_df = changed_df.drop(['Sex', 'Prevalence', 'Indicator'], axis=1)
+    changed_df = changed_df.groupby(['Country Name', 'Year']).first().reset_index()
+    print(changed_df)
+    if save_path is not None:
+        changed_df.to_excel(save_path)
+    return changed_df
+
 
 if __name__ == '__main__':
     raw_who_cvd_df = pd.read_csv('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw '
@@ -240,32 +300,41 @@ save_path = (
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
 who_cvd_df = select_df(raw_who_cvd_df, column_drop=column_drop, drop_na=na_header,
                        save_path=save_path)
-who_cvd_df= pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+who_cvd_df = pd.read_excel(
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
 # “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
-drop_na =['Age Group']
-save_path=('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
-who_cvd_df_preprocess = preprocess_cvd(who_cvd_df,drop_na= drop_na,save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
+drop_na = ['Age Group']
+save_path = (
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, drop_na=drop_na,
+                                       save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
 
-who_cvd_df_preprocess = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
-who_cvd_df_preprocess= preprocess_cvd(who_cvd_df_preprocess)
-save_path = ('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
-new_df = create_age_grouping(who_cvd_df_preprocess,save_path=save_path)
+who_cvd_df_preprocess = pd.read_excel(
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+who_cvd_df_preprocess = preprocess_cvd(who_cvd_df_preprocess)
+save_path = (
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+new_df = create_age_grouping(who_cvd_df_preprocess, save_path=save_path)
 
 raw_tobacco_df = pd.read_csv(
-        "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw "
-        "data/Prevalence_of_current_tobacco_use_between_Males_and_Females.csv")
-rename= {'Entity':'Country Name','Code':'Country Code'}
-na_header = ['Prevalence of current tobacco use, males (% of male adults)',
-             'Prevalence of current tobacco use, females (% of female adults)']
-col_drop=['Continent']
-save_path = ('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/Prevalence of Tobacco use.xlsx')
-tobacco_df = select_df(raw_tobacco_df,rename_mapping = rename,column_drop=col_drop, drop_na=na_header,save_path=save_path)
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw data/Estimate of current tobacco smoking '
+    'prevalence(%)(age-standardized rate)_17 Jan 2022.csv')
+
+rename = {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
+
+save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/Prevalence of Tobacco use_modified.xlsx'
+tobacco_df = select_df(raw_tobacco_df, rename_mapping=rename, save_path=save_path)
+
+tobacco_df = pd.read_excel(
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/Prevalence of Tobacco use_modified.xlsx')
+save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/Prevalence of Tobacco use_Changed_layout.xlsx'
+changed_df = tobacco_layout_modified(tobacco_df, save_path=save_path)
 
 # merge df1 & df2 test
 df1 = new_df
-df2 = tobacco_df
+df2 = changed_df
 
 cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year'], how='outer')
-cvd_tobacco.fillna(value='NaN', inplace=True) # inplace = True means that 'value = 'NaN'' will inplace original value in df. 'Nan' can changed what you want to instead of.
+cvd_tobacco.fillna(value='NaN',
+                   inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value in df. 'Nan' can changed what you want to instead of.
 cvd_tobacco.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/merge_cvd_tobacco.xlsx')
-
