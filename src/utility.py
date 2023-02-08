@@ -173,8 +173,8 @@ def select_df(df: pd.DataFrame,
 
     year_mask: pd.Series[bool] = df['Year'] >= year  # type is list of bool; compared df["year"] whether larger than
     # default year (year: int = 2000)
-#    entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in
-#                              df['Country Name']]  # check countries whether
+    #    entity_mask: List[bool] = [country in WHO_MEMBER_STATES for country in
+    #                              df['Country Name']]  # check countries whether
     # in df['Entity'] also in WHO_MEMBER_STATES. If Yes =True
     modified_df: pd.DataFrame = df[year_mask].reset_index(
         drop=True)  # create a new df that only meet both
@@ -305,7 +305,7 @@ def create_age_grouping(df: pd.DataFrame,
 
 
 def tobacco_layout_modified(df: pd.DataFrame,
-                            column_drop: None,
+                            column_drop: Optional[Path] = None,
                             save_path: Optional[Path] = None) -> pd.DataFrame:
     if column_drop is not None:
         df = df.drop(columns=column_drop)
@@ -403,6 +403,6 @@ df1 = new_df
 df2 = changed_df
 
 cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year'], how='outer')
-cvd_tobacco.fillna(value='NaN',inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
+cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
 # in df. 'Nan' can changed what you want to instead of.
 cvd_tobacco.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/merge_cvd_tobacco.xlsx')
