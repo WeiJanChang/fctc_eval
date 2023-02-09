@@ -1,9 +1,29 @@
 """
 pipeline
 
-Step 1: Setup dates in a uniform format
+Step 1:
 
-Step 2: drop Entities in cvd_tobacco which shows Nan in Ratification of WHO_FCTC_Parties_date_filter .xlsx
+        Download signature and ratification of FCTC raw data from UN
+        https://treaties.un.org/pages/ViewDetails.aspx?src=TREATY&mtdsg_no=IX-4&chapter=9&clang=_en
+
+
+Step 2:
+
+        format date 'dd/mm/yy'
+        header:['Country Name', 'Signature', 'Ratification']
+        **188 (188, 3)**
+
+Step 3:
+
+        merge WHOFCTC_Parties_date_formatted.xlsx and merge_cvd_tobacco.xlsx
+        drop_missing_data
+        **82 (424, 22)**
+
+step 4 :
+
+        mask non-ratified parties
+        **78 (400, 22)**
+
 
 """
 
@@ -15,47 +35,50 @@ import numpy as np
 
 def format_date(df: pd.DataFrame,
                 rename_mapping: Dict[str, str] = None,
-                uniform_date: Optional[List[str]] = None,
+                formatted_date: Optional[List[str]] = None,
                 save_path: Optional[Path] = None) -> pd.DataFrame:
     if rename_mapping is not None:
         df = df.rename(columns=rename_mapping)
-    if uniform_date is not None:
-        for col in uniform_date:
+    if formatted_date is not None:
+        for col in formatted_date:
             df[col] = pd.to_datetime(df[col], infer_datetime_format=True)
-            df[col] = df[col].dt.strftime('%d/%m/%Y')
+            df[col] = df[col].dt.strftime("%d %b %Y")
     df.fillna(value='Nan', inplace=True)
     if save_path is not None:
         df.to_excel(save_path)
     return df
 
 
-def ratified_parties(df: pd.DataFrame,
-                     drop_na: None,
-                     column_drop: Optional[List[str]] = None,
-                     save_path: Optional[Path] = None) -> pd.DataFrame:
-    if drop_na is not None:
-        df = df.mask(df['Country Name'].isin(['Argentina', 'Cuba', 'Switzerland']), np.nan)
-        df.dropna(subset=['Country Name'], inplace=True)
-        df = df.dropna(how='any')
-    if column_drop is not None:
-        df = df.drop(columns=column_drop)
-
-    if save_path is not None:
-        df.to_excel(save_path)
-    return df
-
-
 if __name__ == '__main__':
-    df = pd.read_excel('/Users/wei/Python/MPHDissertation/test_file/WHO_FCTC_Parties_date_filter .xlsx')
-    rename = {
-        "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'}
-    uniform_date = ['Signature', 'Ratification']
-    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_filter.xlsx'
-    format_date(df, rename_mapping=rename, uniform_date=uniform_date, save_path=save_path)
+    df = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw data/Signatures and '
+                       'Ratifications- UN Treaty Section_08 Feb_2023 .xlsx', engine='openpyxl')
+    rename = {'Participant': 'Country Name',
+              "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'}
+    formatted_date = ['Signature', 'Ratification']
+    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx'
+    format_date(df, rename_mapping=rename, formatted_date=formatted_date, save_path=save_path)
 
-    df1 = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/merge_cvd_tobacco_no_missingdata.xlsx')
-    drop_na = True
-    col_drop = ['Unnamed: 0.1', 'Unnamed: 0']
-    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_ratified.xlsx'
-    ratified_parties(df1, drop_na=drop_na, column_drop=col_drop, save_path=save_path)
+# merge
+df1 = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/merge_cvd_tobacco.xlsx',
+                    engine='openpyxl')
+df2 = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx',
+                    engine='openpyxl')
+
+signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
+signed_df.fillna(value='NaN', inplace=True)
+signed_df.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
+
+# drop_missing_data
+df = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
+df = df.dropna(how='any')  # drop the rows having Nan
+df = df.drop(columns=['Unnamed: 0', 'Unnamed: 0_x', 'Unnamed: 0_y'])
+df.to_excel(
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date_no_missingdata.xlsx')
+
+# mask non ratified parties
+
+mask = df['Ratification'] != 'Nan'
+df = df[mask]
+df = df[df['Ratification'] != 'Nan']
+df.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH '
+            'Dissertation/Data/WHOFCTC_Parties_ratified_date_no_missingdata.xlsx')
