@@ -15,7 +15,7 @@ Step 2:
 
 Step 3:
 
-        merge WHOFCTC_Parties_date_formatted.xlsx and merge_cvd_tobacco.xlsx
+        merge WHOFCTC_Parties_date_formatted.xlsx (n=188) and merge_cvd_tobacco.xlsx (n=89)
         drop_missing_data
         **82 (424, 22)**
 

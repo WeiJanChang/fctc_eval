@@ -20,12 +20,13 @@ Step 2:
 
         df1 (raw data): ['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex', 'Age group
         code', 'Age Group', 'Number', 'Percentage of cause-specific deaths out of total deaths', 'Age-standardized
-        death rate per 100 000 standard population', 'Death rate per 100 000 population', 'Unnamed: 12'] **114 (
-        297066, 13)**
+        death rate per 100 000 standard population', 'Death rate per 100 000 population', 'Unnamed: 12']
+        **114 (297066, 13)**
 
         df1 (after select): ['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex',
         'Age Group', 'Number', 'Percentage of cause-specific deaths out of total deaths', 'Age-standardized death
-        rate per 100 000 standard population', 'Death rate per 100 000 population'] **111 (111401, 11)**
+        rate per 100 000 standard population', 'Death rate per 100 000 population']
+        **111 (111401, 11)**
 
 Step 3:
 
@@ -93,7 +94,7 @@ Step 10:
         'All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
         'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
         'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths']
-        **98 (1670, 14)**
+        **111 (1670, 14)**
 
         df2(Tobacco): Header:
         ['Country Name', 'Year', 'All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
