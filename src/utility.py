@@ -324,7 +324,8 @@ def tobacco_layout_modified(df: pd.DataFrame,
     _df = pd.DataFrame.from_dict(dy)
     sex_values = ['Both sexes', 'Male', 'Female']
     indicator_values = ['Estimate of current tobacco use prevalence (%) (age-standardized rate)',
-                        'Estimate of current tobacco smoking prevalence (%) (age-standardized rate)']
+                        'Estimate of current tobacco smoking prevalence (%) (age-standardized rate)',
+                        'Estimate of current cigarette smoking prevalence (%) (age-standardized rate)']
 
     changed_df = _df.assign(
         All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate=_df.query(
@@ -345,6 +346,15 @@ def tobacco_layout_modified(df: pd.DataFrame,
             'Prevalence'],
         Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate=_df.query(
             "Sex == 'Female'& Indicator =='Estimate of current tobacco smoking prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+        All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Both sexes'& Indicator =='Estimate of current cigarette smoking prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+        Male_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Male'& Indicator =='Estimate of current cigarette smoking prevalence (%) (age-standardized rate)'")[
+            'Prevalence'],
+        Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate=_df.query(
+            "Sex == 'Female'& Indicator =='Estimate of current cigarette smoking prevalence (%) (age-standardized rate)'")[
             'Prevalence'])
 
     changed_df.reset_index(drop=True, inplace=True)
@@ -377,7 +387,6 @@ save_path = (
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
 who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, drop_na=drop_na,
                                        save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
-
 
 who_cvd_df_preprocess = pd.read_excel(
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')

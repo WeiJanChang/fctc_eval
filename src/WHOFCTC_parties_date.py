@@ -49,9 +49,40 @@ def format_date(df: pd.DataFrame,
     return df
 
 
+def final_selected(df: pd.DataFrame,
+                   column_drop: Optional[List[str]] = None,
+                   save_path: Optional[Path] = None,
+                   drop_na: Optional[List[str]] = None, ) -> pd.DataFrame:
+    """
+
+    :param df:
+    :param column_drop:
+    :param save_path:
+    :param drop_na:
+    :return:
+    """
+    df = df.copy()
+    if column_drop is not None:
+        df = df.drop(columns=column_drop)
+    if drop_na is not None:  # drop rows with missing values ('NaN') from df
+        try:
+            df.dropna(subset=drop_na, inplace=True)
+            # inplace = True means that the original df will be modified and no copy will be made.; But, if inplace =
+            # False, df will still show the initial one. subset = drop_na means drop in specific place you set.
+        except KeyError as e:
+            raise ValueError(f'{e} not in the dataframe, should be one of the {df.columns.tolist()}')  # If
+            # typed wrong, show the list which should be dropped.
+    if save_path is not None:
+        df.to_excel(save_path)
+
+    return df
+
+
 if __name__ == '__main__':
-    df = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw data/Signatures and '
-                       'Ratifications- UN Treaty Section_08 Feb_2023 .xlsx', engine='openpyxl')
+    df = pd.read_excel(
+        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw data/Signatures and Ratifications- UN '
+        'Treaty Section_08 Feb_2023_Name chnaged.xlsx',
+        engine='openpyxl')
     rename = {'Participant': 'Country Name',
               "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'}
     formatted_date = ['Signature', 'Ratification']
@@ -66,19 +97,34 @@ df2 = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Dat
 
 signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
 signed_df.fillna(value='NaN', inplace=True)
-signed_df.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
+signed_df.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH '
+                   'Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
+column_drop = ['All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+               'Male_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+               'Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate']
+drop_na = ['Unnamed: 0_x', 'Unnamed: 0_y', 'All_Number_of_Cause_Specific_Deaths',
+           'Female_Number_of_Cause_Specific_Deaths',
+           'Male_Number_of_Cause_Specific_Deaths', 'All_Total_Number_of_Deaths',
+           'Female_Total_Number_of_Deaths', 'Male_Total_Number_of_Deaths',
+           'All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
+           'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
+           'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
+           'All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
+           'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
+           'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
+           'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+           'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+           'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+           'Signature', 'Ratification']
+save_path = (
+    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date_no_cigarettesmoking.xlsx')
+new_df = final_selected(signed_df, column_drop=column_drop, drop_na=drop_na, save_path=save_path)
 
-# drop_missing_data
-df = pd.read_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
-df = df.dropna(how='any')  # drop the rows having Nan
-df = df.drop(columns=['Unnamed: 0', 'Unnamed: 0_x', 'Unnamed: 0_y'])
-df.to_excel(
-    '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_signed_date_no_missingdata.xlsx')
-
-# mask non ratified parties
-
-mask = df['Ratification'] != 'Nan'
-df = df[mask]
-df = df[df['Ratification'] != 'Nan']
-df.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH '
-            'Dissertation/Data/WHOFCTC_Parties_ratified_date_no_missingdata.xlsx')
+new_df.replace("NaN", np.nan, inplace=True)
+new_df.dropna(how='any', inplace=True)
+new_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
+new_df1 = new_df
+new_df1.replace("Nan", np.nan, inplace=True)
+new_df1.dropna(how='any', inplace=True)
+new_df1.to_excel(
+    "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_ratified Parties_no_missingdata.xlsx")
