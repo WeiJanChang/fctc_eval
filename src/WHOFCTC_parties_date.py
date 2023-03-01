@@ -128,3 +128,19 @@ new_df1.replace("Nan", np.nan, inplace=True)
 new_df1.dropna(how='any', inplace=True)
 new_df1.to_excel(
     "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_ratified Parties_no_missingdata.xlsx")
+print(new_df1['Country Name'].unique(), len(new_df1['Country Name'].unique()), new_df1.shape, new_df1.columns.tolist())
+
+counts_df = new_df1['Country Name'].value_counts().to_frame()
+
+counts_df.columns = ['count']
+counts_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/count_country.xlsx")
+
+# select specific country in df
+# 找出所有包含指定值的行
+result_df = new_df1[new_df1.isin(
+    ['Iceland', 'Netherlands', 'Spain', 'Germany', 'Czechia', 'Lithuania', 'Mauritius', 'Kazakhstan', 'Latvia',
+     'Costa Rica', 'Estonia', 'Ecuador', 'Serbia', 'Georgia', 'Slovenia', 'Guatemala', 'Mexico', 'Austria',
+     'Singapore']).any(axis=1)].dropna(how='all')
+
+result_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/19_ratified_country.xlsx")
+
