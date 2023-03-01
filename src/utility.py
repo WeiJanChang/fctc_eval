@@ -214,15 +214,15 @@ def preprocess_cvd(df: pd.DataFrame,
     # Sum of number of death in each age group
     numbers = df['Number']
     percentage = df['Percentage of cause-specific deaths out of total deaths']
-    df["Total Number of Cause-Specific Deaths"] = numbers * 100 / percentage
-    total_number_of_death = df["Total Number of Cause-Specific Deaths"]
+    df["Total Number of Deaths"] = numbers * 100 / percentage
+    total_number_of_death = df["Total Number of Deaths"]
     mask_nan = np.isnan(total_number_of_death)  # type: pd.Series[bool] # if value is NaN, NaN = True
 
     df.loc[
-        mask_nan, "Total Number of Cause-Specific Deaths"] = 0  # search location of df. if index ('Total number of death') is
+        mask_nan, "Total Number of Deaths"] = 0  # search location of df. if index ('Total number of death') is
     # NaN, change NaN to 0. ( if no.loc :SettingWithCopyWarning: A value is trying to be set on a copy of a slice
     # from a DataFrame
-    df["Total Number of Cause-Specific Deaths"] = df["Total Number of Cause-Specific Deaths"].astype(
+    df["Total Number of Deaths"] = df["Total Number of Deaths"].astype(
         int)  # astype can cast/change multiple types (
     # change type to int)
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
@@ -247,7 +247,7 @@ def create_age_grouping(df: pd.DataFrame,
     :return: new df
     """
 
-    if 'Total Number of Cause-Specific Deaths' not in df.columns:
+    if 'Total Number of Deaths' not in df.columns:
         raise RuntimeError('call preprocess_cvd in advance')
 
     dy: dict = collections.defaultdict(list)  # defaultdict object in collections. datatype will be dict. Using list
@@ -266,10 +266,10 @@ def create_age_grouping(df: pd.DataFrame,
         dy['Sex'].append(it[5])  # Sex in [5]
 
     numbers = group['Number']
-    total_number_of_death = group['Total Number of Cause-Specific Deaths']
+    total_number_of_death = group['Total Number of Deaths']
     # noinspection PyTypeChecker todo: wt is it?
     dy['Number'] = np.array(numbers.sum())
-    dy['Total Number of Cause-Specific Deaths'] = np.array(total_number_of_death.sum())
+    dy['Total Number of Deaths'] = np.array(total_number_of_death.sum())
     dy['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'] = np.array(
         numbers.sum() / total_number_of_death.sum() * 100)
 
@@ -278,13 +278,13 @@ def create_age_grouping(df: pd.DataFrame,
     # change layout
     sex_values = ['All', 'Female', 'Male']
     new_df = _df.assign(
-        All_Number=_df.query("Sex == 'All'")['Number'],
-        Female_Number=_df.query("Sex == 'Female'")['Number'],
-        Male_Number=_df.query("Sex == 'Male'")['Number'],
-        All_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'All'")['Total Number of Cause-Specific Deaths'],
-        Female_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Female'")[
-            'Total Number of Cause-Specific Deaths'],
-        Male_Total_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Male'")['Total Number of Cause-Specific Deaths'],
+        All_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'All'")['Number'],
+        Female_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Female'")['Number'],
+        Male_Number_of_Cause_Specific_Deaths=_df.query("Sex == 'Male'")['Number'],
+        All_Total_Number_of_Deaths=_df.query("Sex == 'All'")['Total Number of Deaths'],
+        Female_Total_Number_of_Deaths=_df.query("Sex == 'Female'")[
+            'Total Number of Deaths'],
+        Male_Total_Number_of_Deaths=_df.query("Sex == 'Male'")['Total Number of Deaths'],
         All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'All'")[
             'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
         Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths=_df.query("Sex == 'Female'")[
@@ -293,7 +293,7 @@ def create_age_grouping(df: pd.DataFrame,
             'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'])
     new_df.reset_index(drop=True, inplace=True)
 
-    new_df = new_df.drop(['Sex', 'Number', 'Total Number of Cause-Specific Deaths',
+    new_df = new_df.drop(['Sex', 'Number', 'Total Number of Deaths',
                           'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
                          axis=1)  # axis = 1: specifies to drop columns
 
@@ -378,9 +378,10 @@ save_path = (
 who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, drop_na=drop_na,
                                        save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
 
+
 who_cvd_df_preprocess = pd.read_excel(
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
-who_cvd_df_preprocess = preprocess_cvd(who_cvd_df_preprocess)
+
 save_path = (
     '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
 new_df = create_age_grouping(who_cvd_df_preprocess, save_path=save_path)
