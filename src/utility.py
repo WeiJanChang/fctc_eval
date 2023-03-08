@@ -237,7 +237,7 @@ def preprocess_cvd(df: pd.DataFrame,
 def create_age_grouping(df: pd.DataFrame,
                         save_path: Optional[Path] = None) -> pd.DataFrame:
     """
-    Calculate: Total percentage of CVD of total deaths = Sum of number/ Sum of Total number of cause-specific deaths
+    Calculate: Total percentage of CVD of total deaths = Sum of CVD death number/ Sum of Total number of deaths
     * 100 (Male/ Female/ All in each year and country)
     grouping_age: Age groups --> one age group (greater 15 y/o)
     create a new df and save it to excel
