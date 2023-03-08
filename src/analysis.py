@@ -33,6 +33,8 @@ import matplotlib.pyplot as plt
 from typing import Optional, List, Union
 from pathlib import Path
 import os
+import statsmodels.api as sm
+from statsmodels.tsa.stattools import grangercausalitytests
 
 
 def plot_relationship(df: pd.DataFrame,
