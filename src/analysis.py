@@ -17,79 +17,88 @@ Research Questions:
 Step 1: select 19 countries ratified in WHO FCTC
 Step 2: select the year which countries ratified the treaty and compare CVD mortality in before and after the treaty
 Step 3: Use statistical method to analysis
-        i) Time-series analysis
-        ii) Difference analysis
-        iii) t-tests or analysis of variance
-        iv) Multivariate regression analysis
+        i) Interrupted Time Series Analysis
+
+        This method can be used to assess the impact of an intervention (WHO FCTC) on causal relationships,
+        including analyzing trends in epidemiological indicators (Prevalence of Tobacco Use and CVD mortality)
+        before and after the intervention.
+
+
+        ii) Correlation Analysis
+
+        This method can be used to evaluate the correlation between smoking rates and CVD mortality,
+        as well as whether the intervention (WHO FCTC) has changed this relationship.
+
+        iii) Multivariate Regression Analysis
+
+        This method can be used to evaluate complex interactions between smoking, gender, and CVD mortality,
+        including the impact of the intervention (WHO FCTC) on the relationships between these factors.
 """
-
-import pandas as pd
-import matplotlib.pyplot as plt
-from typing import Optional, List
-from pathlib import Path
-
-import pandas as pd
-import matplotlib.pyplot as plt
-from typing import Optional, List, Union
-from pathlib import Path
 import os
-import statsmodels.api as sm
-from statsmodels.tsa.stattools import grangercausalitytests
+
+import pandas as pd
+import numpy as np
+from typing import Optional, List
+import matplotlib.pyplot as plt
 
 
 def plot_relationship(df: pd.DataFrame,
                       select_country: Optional[List[str]] = None,
-                      variable_1: Optional[List[str]] = None,
-                      variable_2: Optional[List[str]] = None,
+                      variable_1: Optional[str] = None,
+                      variable_2: Optional[str] = None,
+                      variable_3: Optional[str] = None,
+                      variable_4: Optional[str] = None,
                       x_label: Optional[str] = None,
                       y_label: Optional[str] = None,
-                      save_path: Optional[Path] = None) -> None:
+                      save_path: Optional[str] = None) -> None:
     # convert 'Year' column to string type
     df['Year'] = df['Year'].astype(str)
     # filter by selected countries
     if select_country is not None:
         for country in select_country:
             country_df = df[df['Country Name'] == country]
-            # check if both variables exist in the DataFrame
-            if variable_1 is not None and variable_1[0] in country_df.columns and \
-                    variable_2 is not None and variable_2[0] in country_df.columns:
-                # plot the two variables on the same figure
-                fig, ax1 = plt.subplots()
-                ax1.plot(country_df['Year'], country_df[variable_1[0]], label=variable_1[0], color='b')
-                ax1.set_xlabel(x_label or 'Year')
-                ax1.set_ylabel(variable_1[0], color='b')
-                ax1.tick_params(axis='y', labelcolor='b')
+            # create a new figure with 2 subplots
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+            # plot variable_1 and variable_2 on the first subplot
+            ax1.plot(country_df['Year'], country_df[variable_1], color='b')
+            ax1.plot(country_df['Year'], country_df[variable_2], color='r')
+            ax1.set_xlabel(x_label or 'Year')
+            ax1.set_ylabel('Prevalence of Tobacco Use & CVD Mortality', color='k')
+            ax1.tick_params(axis='y', labelcolor='k')
+            ax1.legend(['Prevalence of Tobacco Use in Males (%)', 'CVD Mortality in Males (%)'], loc='upper left')
+            # plot variable_3 and variable_4 on the second subplot
+            ax2.plot(country_df['Year'], country_df[variable_3], color='g')
+            ax2.plot(country_df['Year'], country_df[variable_4], color='m')
+            ax2.set_xlabel(x_label or 'Year')
+            ax2.set_ylabel('Prevalence of Tobacco Use & CVD Mortality', color='k')
+            ax2.tick_params(axis='y', labelcolor='k')
+            ax2.legend(['Prevalence of Tobacco Use in Females (%)', 'CVD Mortality in Females (%)'], loc='upper left')
+            # set titles and axis labels for the figure
+            plt.suptitle(f'{country} Statistics')
+            plt.xticks(country_df['Year'])
 
-                ax2 = ax1.twinx()
-                ax2.plot(country_df['Year'], country_df[variable_2[0]], label=variable_2[0], color='r')
-                ax2.set_ylabel(variable_2[0], color='r')
-                ax2.tick_params(axis='y', labelcolor='r')
-
-                plt.title(f'CVD Mortality and Prevalence of Tobacco Use in {country}')
-                plt.xticks(country_df['Year'], rotation=90)
-                plt.title(f'CVD Mortality and Prevalence of Tobacco Use in {country}')
-                if save_path is not None:
-                    if not os.path.exists(os.path.dirname(save_path)):
-                        os.makedirs(os.path.dirname(save_path))
-                    fig.savefig(save_path, dpi=300, bbox_inches='tight')
-
-        plt_country = plt.show()
-        print(plt_country)
-        return plt_country
+            if y_label is not None:
+                fig.text(0.06, 0.5, y_label, va='center', rotation='vertical')
+            if save_path is not None:
+                if not os.path.exists(os.path.dirname(save_path)):
+                    os.makedirs(os.path.dirname(save_path))
+                fig.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.show()
 
 
 if __name__ == '__main__':
     df = pd.read_excel(
         "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/19_ratified_country.xlsx")
     select_country = df['Country Name'].unique()
-    variable_1 = ['CVD Mortality in Male (%)']
-    variable_2 = ['Prevalence of Tobacco use in Male (age_standardized_rate) (%)']
+    variable_1 = 'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+    variable_2 = 'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+    variable_3 = 'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+    variable_4 = 'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
     x_label = 'Year'
-    y_label = 'CVD Mortality & Prevalence of Tobacco Use'
-    save_path = '/Users/wei/Python/MPHDissertation/test_file/plot.png'
-    df = plot_relationship(df, select_country=select_country, variable_1=variable_1, variable_2=variable_2,
-                           x_label=x_label, y_label=y_label, save_path=save_path)
-    if save_path is not None and os.path.isfile(save_path):
-        print(f"{save_path} exists.")
-    else:
-        print(f"{save_path} does not exist.")
+
+    plot_relationship(df, select_country=select_country,
+                      variable_1=variable_1,
+                      variable_2=variable_2,
+                      variable_3=variable_3,
+                      variable_4=variable_4,
+                      x_label=x_label)

@@ -41,11 +41,6 @@ Module used for data visualization and analysis
 
 - `utility.py`:
 
-
-## selection
-
-
-
 ## ratified date
 
 - `WHOFCTC_parties_date.py`: 
