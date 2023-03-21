@@ -111,15 +111,3 @@ signed_df.replace("NaN", np.nan, inplace=True)
 signed_df.dropna(how='any', inplace=True)
 signed_df.to_excel(
     "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
-
-counts_df = signed_df['Country Name'].value_counts().to_frame()
-
-counts_df.columns = ['count']
-counts_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/count_country.xlsx")
-# 找出所有包含指定值的行
-result_df = signed_df[signed_df.isin(
-    ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia', 'Germany',
-     'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
-     ]).any(axis=1)].dropna(how='all')
-
-result_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/19_ratified_country.xlsx")
