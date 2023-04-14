@@ -42,10 +42,13 @@ Step 3: Use statistical method to analysis
         including the impact of the intervention (WHO FCTC) on the relationships between these factors.
 """
 import os
-import pandas as pd
-from typing import Optional, List
 from pathlib import Path
+from typing import Optional, List
+
 import matplotlib.pyplot as plt
+import pandas as pd
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 
 
 def consistent_year(df: pd.DataFrame,
@@ -66,7 +69,6 @@ def consistent_year(df: pd.DataFrame,
     if save_path is not None:
         interval_df.to_excel(save_path)
     return interval_df
-
 
 
 def plot_relationship(df: pd.DataFrame,
@@ -117,14 +119,15 @@ if __name__ == '__main__':
     interval_df = pd.read_excel(
         "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
     year_mask = 2018, 2019
-    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/test.xlsx'
+    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_2000-2020,5yrs interval.xlsx'
     new_df = consistent_year(interval_df, year_mask=year_mask, save_path=save_path)
 
     count_df = new_df['Country Name'].value_counts().to_frame()
     count_df.columns = ['count']
     count_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/count_country_.xlsx")
     result_df = new_df[new_df.isin(
-        ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia', 'Germany',
+        ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia',
+         'Germany',
          'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
          ]).any(axis=1)].dropna(how='all')
 
@@ -145,9 +148,3 @@ if __name__ == '__main__':
                       variable_3=variable_3,
                       variable_4=variable_4,
                       x_label=x_label)
-
-
-
-
-
-
