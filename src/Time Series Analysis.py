@@ -7,6 +7,7 @@ todo: write only one function to run 4 different variables instead of using 4 fu
 II. Check for stationary, seasonality, and trend
 
 III. Check for autocorrelation
+todo: write only one function to run 4 different variables instead of using 4 functions
 
 IV. Decompose the time series
 
@@ -245,3 +246,74 @@ for i, (city, group) in enumerate(df.groupby('Country Name')):
 
 plt.tight_layout()
 plt.savefig('Autocorrelation_Tobacco use in Females.png')
+
+# Autocorrelation and Partial Autocorrelation Functions
+# 1.Autocorrelation is simply the correlation of a series with its own lags. If a series is significantly
+# autocorrelated, that means, the previous values of the series (lags) maybe helpful in predicting the current value.
+# 2.Partial Autocorrelation also conveys similar information but it conveys the pure correlation of a series and
+# its lag, excluding the correlation contributions from the intermediate lags.
+
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+from statsmodels.tsa.stattools import acf, pacf
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
+# Draw Plot
+# Create a new figure and set the size
+# 1. ACF and PACF_CVD Mortality in Males
+fig, axes = plt.subplots(len(df.groupby('Country Name')), 2, figsize=(12, 40), dpi=100)
+
+# Loop through the countries and add subplots to the figure
+for i, (country, group) in enumerate(df.groupby('Country Name')):
+    # Plot the ACF and PACF on the subplots
+    plot_acf(group['Male_Total Percentage of CVD Deaths'].tolist(), lags=4, ax=axes[i, 0])
+    plot_pacf(group['Male_Total Percentage of CVD Deaths'].tolist(), lags=1, method='ywm', ax=axes[i, 1])
+
+    # Set the titles for the subplots
+    axes[i, 0].set_title(f'{country} ACF')
+    axes[i, 1].set_title(f'{country} PACF')
+
+# Adjust the layout of the subplots and save the figure as a PNG file
+plt.tight_layout()
+plt.savefig('ACF and PACF_CVD Mortality in Males.png', dpi=100)
+
+# 2. ACF and PACF_CVD Mortality in Females
+fig, axes = plt.subplots(len(df.groupby('Country Name')), 2, figsize=(12, 40), dpi=100)
+
+for i, (country, group) in enumerate(df.groupby('Country Name')):
+    plot_acf(group['Female_Total Percentage of CVD Deaths'].tolist(), lags=4, ax=axes[i, 0])
+    plot_pacf(group['Female_Total Percentage of CVD Deaths'].tolist(), lags=1, method='ywm', ax=axes[i, 1])
+
+    axes[i, 0].set_title(f'{country} ACF')
+    axes[i, 1].set_title(f'{country} PACF')
+
+plt.tight_layout()
+plt.savefig('ACF and PACF_CVD Mortality in Females.png', dpi=100)
+
+# 3. ACF and PACF_Tobacco Use Prevalence in Males
+fig, axes = plt.subplots(len(df.groupby('Country Name')), 2, figsize=(12, 40), dpi=100)
+
+for i, (country, group) in enumerate(df.groupby('Country Name')):
+    plot_acf(group['Male_Prevalence of Current Tobacco Use Estimated (ASR)'].tolist(), lags=4, ax=axes[i, 0])
+    plot_pacf(group['Male_Prevalence of Current Tobacco Use Estimated (ASR)'].tolist(), lags=1, method='ywm',
+              ax=axes[i, 1])
+
+    axes[i, 0].set_title(f'{country} ACF')
+    axes[i, 1].set_title(f'{country} PACF')
+
+plt.tight_layout()
+plt.savefig('ACF and PACF_Prevalence of Tobacco Use in Males.png', dpi=100)
+
+# 4. ACF and PACF_Tobacco Use Prevalence in Females
+fig, axes = plt.subplots(len(df.groupby('Country Name')), 2, figsize=(12, 40), dpi=100)
+
+for i, (country, group) in enumerate(df.groupby('Country Name')):
+    plot_acf(group['Female_Prevalence of Current Tobacco Use Estimated (ASR)'].tolist(), lags=4, ax=axes[i, 0])
+    plot_pacf(group['Female_Prevalence of Current Tobacco Use Estimated (ASR)'].tolist(), lags=1, method='ywm',
+              ax=axes[i, 1])
+
+    axes[i, 0].set_title(f'{country} ACF')
+    axes[i, 1].set_title(f'{country} PACF')
+
+plt.tight_layout()
+plt.savefig('ACF and PACF_Prevalence of Tobacco Use in Females.png', dpi=100)
