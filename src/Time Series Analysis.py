@@ -261,6 +261,7 @@ from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 # Draw Plot
 # Create a new figure and set the size
 # 1. ACF and PACF_CVD Mortality in Males
+# Create a new figure and set the size
 fig, axes = plt.subplots(len(df.groupby('Country Name')), 2, figsize=(12, 40), dpi=100)
 
 # Loop through the countries and add subplots to the figure
@@ -270,8 +271,8 @@ for i, (country, group) in enumerate(df.groupby('Country Name')):
     plot_pacf(group['Male_Total Percentage of CVD Deaths'].tolist(), lags=1, method='ywm', ax=axes[i, 1])
 
     # Set the titles for the subplots
-    axes[i, 0].set_title(f'{country} ACF')
-    axes[i, 1].set_title(f'{country} PACF')
+    axes[i, 0].set_title(f'{country} ACF-CVD Mortality in Males')
+    axes[i, 1].set_title(f'{country} PACF-CVD Mortality in Males')
 
 # Adjust the layout of the subplots and save the figure as a PNG file
 plt.tight_layout()
@@ -284,9 +285,8 @@ for i, (country, group) in enumerate(df.groupby('Country Name')):
     plot_acf(group['Female_Total Percentage of CVD Deaths'].tolist(), lags=4, ax=axes[i, 0])
     plot_pacf(group['Female_Total Percentage of CVD Deaths'].tolist(), lags=1, method='ywm', ax=axes[i, 1])
 
-    axes[i, 0].set_title(f'{country} ACF')
-    axes[i, 1].set_title(f'{country} PACF')
-
+    axes[i, 0].set_title(f'{country} ACF-CVD Mortality in Females')
+    axes[i, 1].set_title(f'{country} PACF-CVD Mortality in Females')
 plt.tight_layout()
 plt.savefig('ACF and PACF_CVD Mortality in Females.png', dpi=100)
 
@@ -298,8 +298,8 @@ for i, (country, group) in enumerate(df.groupby('Country Name')):
     plot_pacf(group['Male_Prevalence of Current Tobacco Use Estimated (ASR)'].tolist(), lags=1, method='ywm',
               ax=axes[i, 1])
 
-    axes[i, 0].set_title(f'{country} ACF')
-    axes[i, 1].set_title(f'{country} PACF')
+    axes[i, 0].set_title(f'{country} ACF-Prevalence of Tobacco Use in Males')
+    axes[i, 1].set_title(f'{country} PACF-Prevalence of Tobacco Use in Males')
 
 plt.tight_layout()
 plt.savefig('ACF and PACF_Prevalence of Tobacco Use in Males.png', dpi=100)
@@ -312,8 +312,8 @@ for i, (country, group) in enumerate(df.groupby('Country Name')):
     plot_pacf(group['Female_Prevalence of Current Tobacco Use Estimated (ASR)'].tolist(), lags=1, method='ywm',
               ax=axes[i, 1])
 
-    axes[i, 0].set_title(f'{country} ACF')
-    axes[i, 1].set_title(f'{country} PACF')
+    axes[i, 0].set_title(f'{country} ACF-Prevalence of Tobacco Use in Females')
+    axes[i, 1].set_title(f'{country} PACF-Prevalence of Tobacco Use in Females')
 
 plt.tight_layout()
 plt.savefig('ACF and PACF_Prevalence of Tobacco Use in Females.png', dpi=100)
