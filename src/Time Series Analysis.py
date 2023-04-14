@@ -317,3 +317,9 @@ for i, (country, group) in enumerate(df.groupby('Country Name')):
 
 plt.tight_layout()
 plt.savefig('ACF and PACF_Prevalence of Tobacco Use in Females.png', dpi=100)
+
+# IV. Decompose the time series
+from statsmodels.tsa.seasonal import seasonal_decompose
+from dateutil.parser import parse
+
+# ValueError: x must have 2 complete cycles requires 60 observations. x only has 5 observation(s)
