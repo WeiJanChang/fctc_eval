@@ -1,6 +1,5 @@
 pipelines:
-  default:
-    - step:
+  default  - step:
         name: Sync GitHub Mirror
         image: alpine/git:latest
         clone:
