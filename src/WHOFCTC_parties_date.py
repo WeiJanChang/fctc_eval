@@ -55,11 +55,11 @@ def final_selected(df: pd.DataFrame,
                    drop_na: Optional[List[str]] = None, ) -> pd.DataFrame:
     """
 
-    :param df:
-    :param column_drop:
-    :param save_path:
-    :param drop_na:
-    :return:
+    :param df:merge_cvd_tobacco.xlsx
+    :param column_drop: drop cigarette_smoking
+    :param save_path:save modified dataframe to another excel
+    :param drop_na: if na in the df
+    :return: df
     """
     df = df.copy()
     if column_drop is not None:
@@ -80,17 +80,17 @@ def final_selected(df: pd.DataFrame,
 
 if __name__ == '__main__':
     df = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/raw data/Signatures and Ratifications- UN '
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/raw data/Signatures and Ratifications- UN '
         'Treaty Section_08 Feb_2023_Name chnaged.xlsx',
         engine='openpyxl')
     rename = {'Participant': 'Country Name',
               "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'}
     formatted_date = ['Signature', 'Ratification']
-    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx'
+    save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx'
     df = format_date(df, rename_mapping=rename, formatted_date=formatted_date, save_path=save_path)
     # merge
     df1 = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/merge_cvd_tobacco.xlsx',
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/merge_cvd_tobacco.xlsx',
         engine='openpyxl')
     column_drop = [
         'All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
@@ -98,16 +98,16 @@ if __name__ == '__main__':
         'Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate']
     df1 = final_selected(df1, column_drop=column_drop)
     df2 = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx',
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx',
         engine='openpyxl')
 
 signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
 signed_df.fillna(value='NaN', inplace=True)
-signed_df.to_excel('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH '
+signed_df.to_excel('/Users/wei/UCD-MPH/MPH Lecture/MPH '
                    'Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
 
 # drop_missing_data
 signed_df.replace("NaN", np.nan, inplace=True)
 signed_df.dropna(how='any', inplace=True)
 signed_df.to_excel(
-    "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
+    "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
