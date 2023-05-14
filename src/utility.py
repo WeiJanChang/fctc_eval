@@ -226,7 +226,7 @@ def preprocess_cvd(df: pd.DataFrame,
         int)  # astype can cast/change multiple types (
     # change type to int)
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
-        df = df.mask(df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]']), np.nan)
+        df = df.mask(df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]','[All]']), np.nan)
         df.dropna(subset=['Age Group'], inplace=True)
 
     if save_path is not None:
