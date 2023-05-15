@@ -51,4 +51,4 @@ Thumbs.db
 .ipynb_checkpoints
 
 #personal IDE config files
-*.idea/workspace.xml
+*.xml
