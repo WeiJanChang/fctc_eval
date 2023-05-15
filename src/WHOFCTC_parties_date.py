@@ -111,3 +111,14 @@ signed_df.replace("NaN", np.nan, inplace=True)
 signed_df.dropna(how='any', inplace=True)
 signed_df.to_excel(
     "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
+
+# 19 countries selected
+
+result_df = signed_df[signed_df.isin(
+    ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia', 'Germany',
+     'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
+     ]).any(axis=1)].dropna(how='all')
+
+result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/19_ratified_country.xlsx")
+
+
