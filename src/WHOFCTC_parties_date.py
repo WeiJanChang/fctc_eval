@@ -41,8 +41,11 @@ def format_date(df: pd.DataFrame,
         df = df.rename(columns=rename_mapping)
     if formatted_date is not None:
         for col in formatted_date:
-            df[col] = pd.to_datetime(df[col], infer_datetime_format=True)
-            df[col] = df[col].dt.strftime("%d %b %Y")
+            #df[col] = pd.to_datetime(df[col], infer_datetime_format=True)
+            #df[col] = pd.to_datetime(df[col].dt.strftime("%d %b %Y").dt.strftime("%Y"))
+            df[col] = pd.to_datetime(df[col], infer_datetime_format=True).dt.strftime("%d %b %Y").str.extract(
+                r'(\d{4})')
+
     df.fillna(value='Nan', inplace=True)
     if save_path is not None:
         df.to_excel(save_path)
