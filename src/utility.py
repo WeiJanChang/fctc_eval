@@ -82,7 +82,7 @@ Step 9:
         'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
         'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
         'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate']
-        **165 (1477, 8)**
+        **165 (1477, 11)**
 
 Step 10:
         merge df1 and df2
@@ -103,7 +103,7 @@ Step 10:
         'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
         'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
         'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate']
-        **165 (1477, 8)**
+        **165 (1477, 11)**
 
         merge them based on Country Name and Year,show NaN if some values are empty, don't drop header:['Region
         Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'All_Number', 'Female_Number', 'Male_Number',
@@ -118,15 +118,10 @@ Step 10:
         'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
         'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
         'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate']
-        **164 (2596, 20)**
+        **185 (2895, 23)**
 
         save it to excel save_path('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/
         Data/merge_cvd_tobacco.xlsx')
-
-step 11:
-
-        drop missing data in the merge_cvd_tobacco.xlsx
-        **89 (460,21)**
 
 """
 
@@ -226,7 +221,7 @@ def preprocess_cvd(df: pd.DataFrame,
         int)  # astype can cast/change multiple types (
     # change type to int)
     if drop_na is not None:  # drop rows with missing values ('NaN') from df
-        df = df.mask(df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]','[All]']), np.nan)
+        df = df.mask(df['Age Group'].isin(['[0]', '[1-4]', '[5-9]', '[10-14]', '[All]']), np.nan)
         df.dropna(subset=['Age Group'], inplace=True)
 
     if save_path is not None:
@@ -297,8 +292,7 @@ def create_age_grouping(df: pd.DataFrame,
                           'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'],
                          axis=1)  # axis = 1: specifies to drop columns
 
-    new_df = new_df.groupby(['Region Code', 'Region Name', 'Country Code', 'Country Name',
-                             'Year']).first().reset_index()  # The first method is then applied to
+    new_df = new_df.groupby(['Country Name', 'Year']).first().reset_index()  # The first method is then applied to
     # the grouped dataframe, which returns the first row of each group
     if save_path:
         new_df.to_excel(save_path)
@@ -369,49 +363,51 @@ def tobacco_layout_modified(df: pd.DataFrame,
 
 if __name__ == '__main__':
     raw_who_cvd_df = pd.read_csv(
-        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/raw data/WHOMortalityDatabase_Deaths_sex_age_a_country_area_year-Cardiovascular diseases_7th February 2023.csv')
-column_drop = ['Age group code', 'Unnamed: 12']
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/raw data/WHOMortalityDatabase_Deaths_sex_age_a_country_area_year-Cardiovascular diseases_7th February 2023.csv')
+column_drop = ['Age group code', 'Unnamed: 12', 'Age-standardized death rate per 100 000 standard population']
 na_header = ['Number',
              'Percentage of cause-specific deaths out of total deaths',
              'Death rate per 100 000 population']
 save_path = (
-    '//Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
 
 who_cvd_df = select_df(raw_who_cvd_df, column_drop=column_drop, drop_na=na_header,
                        save_path=save_path)
 who_cvd_df = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
 # “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
 drop_na = ['Age Group']
-save_path =('/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+save_path = (
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
 who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, drop_na=drop_na,
                                        save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
 
 who_cvd_df_preprocess = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
 
 save_path = (
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
 new_df = create_age_grouping(who_cvd_df_preprocess, save_path=save_path)
 
 raw_tobacco_df = pd.read_csv(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/raw data/Estimate of current tobacco smoking prevalence(%)(age-standardized rate)_17 Jan 2022.csv')
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/raw data/Estimate of current tobacco smoking prevalence(%)(age-standardized rate)_17 Jan 2022.csv')
 
 rename = {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
 
-save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/Prevalence of Tobacco use_modified.xlsx'
+save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/Prevalence of Tobacco use_modified.xlsx'
 tobacco_df = select_df(raw_tobacco_df, rename_mapping=rename, save_path=save_path)
 
 tobacco_df = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/Prevalence of Tobacco use_modified.xlsx')
-save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/Prevalence of Tobacco use_Changed_layout.xlsx'
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/Prevalence of Tobacco use_modified.xlsx')
+save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/Prevalence of Tobacco use_Changed_layout.xlsx'
 changed_df = tobacco_layout_modified(tobacco_df, save_path=save_path)
 
 # merge df1 & df2 test
 df1 = new_df
 df2 = changed_df
 
-cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year'], how='outer')
+cvd_tobacco = pd.merge(df1, df2, on=['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year'], how='outer')
 cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
 # in df. 'Nan' can changed what you want to instead of.
-cvd_tobacco.to_excel('/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/merge_cvd_tobacco.xlsx')
+cvd_tobacco.to_excel(
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/merge_cvd_tobacco.xlsx')
