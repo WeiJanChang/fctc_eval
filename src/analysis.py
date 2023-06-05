@@ -117,24 +117,24 @@ def plot_relationship(df: pd.DataFrame,
 
 if __name__ == '__main__':
     interval_df = pd.read_excel(
-        "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
+        "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_date_no_missingdata.xlsx")
     year_mask = 2018, 2019
-    save_path = '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/WHOFCTC_Parties_2000-2020,5yrs interval.xlsx'
+    save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_2000-2020,5yrs interval.xlsx'
     new_df = consistent_year(interval_df, year_mask=year_mask, save_path=save_path)
 
     count_df = new_df['Country Name'].value_counts().to_frame()
     count_df.columns = ['count']
-    count_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/count_country_.xlsx")
+    count_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/count_country_.xlsx")
     result_df = new_df[new_df.isin(
         ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia',
          'Germany',
          'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
          ]).any(axis=1)].dropna(how='all')
 
-    result_df.to_excel("/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/19_ratified_country.xlsx")
+    result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_ratified_country.xlsx")
 
     plt_df = pd.read_excel(
-        "/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/Data/19_ratified_country.xlsx")
+        "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_ratified_country.xlsx")
     select_country = plt_df['Country Name'].unique()
     variable_1 = 'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
     variable_2 = 'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'

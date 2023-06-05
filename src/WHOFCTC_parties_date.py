@@ -83,37 +83,34 @@ def final_selected(df: pd.DataFrame,
 
 if __name__ == '__main__':
     df = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/raw data/Signatures and Ratifications- UN '
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/raw data/Signatures and Ratifications- UN '
         'Treaty Section_08 Feb_2023_Name chnaged.xlsx',
         engine='openpyxl')
     rename = {'Participant': 'Country Name',
               "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'}
     formatted_date = ['Signature', 'Ratification']
-    save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx'
+    save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_date_formatted.xlsx'
     df = format_date(df, rename_mapping=rename, formatted_date=formatted_date, save_path=save_path)
     # merge
     df1 = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/merge_cvd_tobacco.xlsx',
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/cvd_tobacco_nomissingdata.xlsx',
         engine='openpyxl')
-    column_drop = [
-        'All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
-        'Male_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
-        'Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate']
-    df1 = final_selected(df1, column_drop=column_drop)
+
     df2 = pd.read_excel(
-        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_formatted.xlsx',
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_date_formatted.xlsx',
         engine='openpyxl')
 
 signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
 signed_df.fillna(value='NaN', inplace=True)
 signed_df.to_excel('/Users/wei/UCD-MPH/MPH Lecture/MPH '
-                   'Dissertation/Data/WHOFCTC_Parties_signed_date.xlsx')
+                   'Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_signed_date.xlsx')
 
 # drop_missing_data
 signed_df.replace("NaN", np.nan, inplace=True)
-signed_df.dropna(how='any', inplace=True)
+signed_df= signed_df.dropna(axis=0)
+
 signed_df.to_excel(
-    "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/WHOFCTC_Parties_date_no_missingdata.xlsx")
+    "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_date_no_missingdata.xlsx")
 
 # 19 countries selected
 
@@ -122,6 +119,6 @@ result_df = signed_df[signed_df.isin(
      'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
      ]).any(axis=1)].dropna(how='all')
 
-result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data/19_ratified_country.xlsx")
+result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_ratified_country.xlsx")
 
 
