@@ -422,6 +422,10 @@ columns_to_drop = [
     'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate'
 ]
 cvd_tobacco = cvd_tobacco.drop(columns=columns_to_drop)
-
 cvd_tobacco.to_excel(
     '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/merge_cvd_tobacco.xlsx')
+# drop NaN
+cvd_tobacco.replace('NaN', np.nan, inplace=True)
+cvd_tobacco = cvd_tobacco.dropna(axis=0)
+cvd_tobacco.to_excel(
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/cvd_tobacco_nomissingdata.xlsx')
