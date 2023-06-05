@@ -406,8 +406,22 @@ changed_df = tobacco_layout_modified(tobacco_df, save_path=save_path)
 df1 = new_df
 df2 = changed_df
 
-cvd_tobacco = pd.merge(df1, df2, on=['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year'], how='outer')
+cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year'], how='outer')
 cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
 # in df. 'Nan' can changed what you want to instead of.
+cvd_tobacco.to_excel(
+    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/merge_cvd_tobacco.xlsx')
+
+# drop no need indicators in Tobacco dataset
+columns_to_drop = [
+    'Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+    'Male_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+    'All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+    'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+    'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+    'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate'
+]
+cvd_tobacco = cvd_tobacco.drop(columns=columns_to_drop)
+
 cvd_tobacco.to_excel(
     '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/merge_cvd_tobacco.xlsx')
