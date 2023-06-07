@@ -281,3 +281,35 @@ cvd_tobacco.replace('NaN', np.nan, inplace=True)
 cvd_tobacco = cvd_tobacco.dropna(axis=0)
 cvd_tobacco.to_excel(
     '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/testt3.xlsx')
+
+# merge parties date
+df1 = pd.read_excel(
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/testt3.xlsx',
+        engine='openpyxl')
+
+df2 = pd.read_excel(
+        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_date_formatted.xlsx',
+        engine='openpyxl')
+
+signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
+signed_df.fillna(value='NaN', inplace=True)
+signed_df.to_excel('/Users/wei/UCD-MPH/MPH Lecture/MPH '
+                   'Dissertation/Data (WHO CVD and Tobacco Use)/finaltest.xlsx')
+
+# drop_missing_data
+signed_df.replace("NaN", np.nan, inplace=True)
+signed_df= signed_df.dropna(axis=0)
+
+signed_df.to_excel(
+    "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/finaltest_no_missingdata.xlsx")
+
+# 19 countries selected
+
+result_df = signed_df[signed_df.isin(
+    ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia', 'Germany',
+     'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
+     ]).any(axis=1)].dropna(how='all')
+
+result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_finaltest.xlsx")
+
+
