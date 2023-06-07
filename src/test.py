@@ -217,6 +217,24 @@ def tobacco_layout_modified(df: pd.DataFrame,
         changed_df.to_excel(save_path)
     return changed_df
 
+def consistent_year(df: pd.DataFrame,
+                    year_mask: Optional[List[int]] = None,
+                    save_path: Optional[Path] = None) -> pd.DataFrame:
+    """
+    :param df: WHOFCTC_Parties_date_no_missingdata.xlsx
+    :param year_mask: as Time Series, the Year should have regular interval.
+    and now the year includes 2000, 2005, 2010, 2015, 2018, 2019, and 2020. So, the year 2018 and 2019 should be excluded.
+    :param save_path: save modified dataframe to another excel
+    :return: interval_df
+    """
+    interval_df = df.copy()
+    if year_mask is not None:
+        mask = ~interval_df['Year'].isin([2018, 2019])  # create boolean mask to exclude rows with 2018 and 2019
+        interval_df = interval_df[mask]  # select rows that are not excluded by the mask
+    interval_df = interval_df.reset_index(drop=True)
+    if save_path is not None:
+        interval_df.to_excel(save_path)
+    return interval_df
 
 if __name__ == '__main__':
     raw_who_cvd_df = pd.read_csv(
@@ -311,5 +329,11 @@ result_df = signed_df[signed_df.isin(
      ]).any(axis=1)].dropna(how='all')
 
 result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_finaltest.xlsx")
+
+interval_df = pd.read_excel(
+    "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_finaltest.xlsx")
+year_mask = 2018, 2019
+save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_finaltest,5yrs interval.xlsx'
+new_df = consistent_year(interval_df, year_mask=year_mask, save_path=save_path)
 
 
