@@ -242,98 +242,75 @@ if __name__ == '__main__':
     raw_who_cvd_df = pd.read_csv(
         '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/raw_data'
         '/WHOMortalityDatabase_Deaths_sex_age_a_country_area_year-Cardiovascular diseases_7th February 2023.csv')
-column_drop = ['Age group code', 'Unnamed: 12', 'Age-standardized death rate per 100 000 standard population']
-na_header = ['Number',
-             'Percentage of cause-specific deaths out of total deaths',
-             'Death rate per 100 000 population']
-save_path = (
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test.xlsx')
+    column_drop = ['Age group code', 'Unnamed: 12', 'Age-standardized death rate per 100 000 standard population']
+    na_header = ['Number',
+                 'Percentage of cause-specific deaths out of total deaths',
+                 'Death rate per 100 000 population']
+    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_whocvd.xlsx')
 
-who_cvd_df = select_df(raw_who_cvd_df, column_drop=column_drop, drop_na=na_header,
-                       save_path=save_path)
-who_cvd_df = pd.read_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test.xlsx')
-# “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
-drop_na = ['Age Group']
-save_path = (
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test2.xlsx')
-who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, drop_na=drop_na,
-                                       save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
+    who_cvd_df = select_df(raw_who_cvd_df, column_drop=column_drop, drop_na=na_header, save_path=save_path)
 
-who_cvd_df_preprocess = pd.read_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test2.xlsx')
+    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_whocvd_selectedagegroup.xlsx')
+    who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, ['Age Group'],
+                                           save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
 
-save_path = (
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test3.xlsx')
-new_df = create_age_grouping(who_cvd_df_preprocess, save_path=save_path)
+    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_whocvd_agegrouping.xlsx')
+    age_grouping_df = create_age_grouping(who_cvd_df_preprocess, save_path=save_path)
 
-raw_tobacco_df = pd.read_csv(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/raw_data/Estimate of current tobacco smoking prevalence(%)(age-standardized rate)_17 Jan 2022.csv')
+    raw_tobacco_df = pd.read_csv(
+        '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/raw_data/Estimate of current tobacco smoking '
+        'prevalence(%)(age-standardized rate)_17 Jan 2022.csv')
 
-rename = {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
+    rename = {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
 
-save_path = '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/testt.xlsx'
-tobacco_df = select_df(raw_tobacco_df, rename_mapping=rename, save_path=save_path)
+    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_renametobacco.xlsx')
+    tobacco_df = select_df(raw_tobacco_df, rename_mapping=rename, save_path=save_path)
 
-tobacco_df = pd.read_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/testt.xlsx')
-save_path = '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/testt1.xlsx'
-changed_df = tobacco_layout_modified(tobacco_df, save_path=save_path)
+    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_new_tobacco.xlsx')
+    new_tobacco = tobacco_layout_modified(tobacco_df, save_path=save_path)
 
-# merge df1 & df2 test
-df1 = new_df
-df2 = changed_df
+    # merge df1 & df2 test
+    df1 = age_grouping_df
+    df2 = new_tobacco
 
-cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year', 'Sex'], how='outer')
-cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
-# in df. 'Nan' can changed what you want to instead of.
-cvd_tobacco.to_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test3.xlsx')
+    cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year', 'Sex'], how='outer')
+    cvd_tobacco.fillna(value='NaN',
+                       inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
+    # in df. 'Nan' can changed what you want to instead of.
 
-# drop no need indicators in Tobacco dataset
-columns_to_drop = [
-    'Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
-    'Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate', ]
-cvd_tobacco = cvd_tobacco.drop(columns=columns_to_drop)
-cvd_tobacco.to_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/testt2.xlsx')
-# drop NaN
-cvd_tobacco.replace('NaN', np.nan, inplace=True)
-cvd_tobacco = cvd_tobacco.dropna(axis=0)
-cvd_tobacco.to_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/testt3.xlsx')
+    # drop no need indicators in Tobacco dataset
+    columns_to_drop = [
+        'Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+        'Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate', ]
+    cvd_tobacco = cvd_tobacco.drop(columns=columns_to_drop)
+    # drop NaN
+    cvd_tobacco.replace('NaN', np.nan, inplace=True)
+    cvd_tobacco = cvd_tobacco.dropna(axis=0)
+    cvd_tobacco.to_excel(
+        '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_cvd_tobacco.xlsx')
 
-# merge parties date
-df1 = pd.read_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/testt3.xlsx',
-    engine='openpyxl')
+    # merge parties date
+    who_tobacco_member = pd.read_excel(
+        '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/WHOFCTC_Parties_date_formatted.xlsx',
+        engine='openpyxl')
 
-df2 = pd.read_excel(
-    '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/WHOFCTC_Parties_date_formatted.xlsx',
-    engine='openpyxl')
+    signed_df = pd.merge(cvd_tobacco, who_tobacco_member, on=['Country Name'], how='outer')
+    signed_df.fillna(value='NaN', inplace=True)
+    # drop_missing_data
+    signed_df.replace("NaN", np.nan, inplace=True)
+    signed_df = signed_df.dropna(axis=0)
+    signed_df.to_excel('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_signed_member.xlsx')
 
-signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
-signed_df.fillna(value='NaN', inplace=True)
-signed_df.to_excel('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/finaltest.xlsx')
+    # 19 countries selected
 
-# drop_missing_data
-signed_df.replace("NaN", np.nan, inplace=True)
-signed_df = signed_df.dropna(axis=0)
+    result_df = signed_df[signed_df.isin(
+        ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia',
+         'Germany',
+         'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
+         ]).any(axis=1)].dropna(how='all')
 
-signed_df.to_excel(
-    "/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/finaltest_no_missingdata.xlsx")
+    result_df.to_excel("/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest.xlsx")
 
-# 19 countries selected
-
-result_df = signed_df[signed_df.isin(
-    ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia', 'Germany',
-     'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
-     ]).any(axis=1)].dropna(how='all')
-
-result_df.to_excel("/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest.xlsx")
-
-interval_df = pd.read_excel(
-    "/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest.xlsx")
-year_mask = 2018, 2019
-save_path = '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest,5yrs interval.xlsx'
-new_df = consistent_year(interval_df, year_mask=year_mask, save_path=save_path)
+    year_mask = [2018, 2019]
+    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest,5yrs interval.xlsx')
+    new_df = consistent_year(result_df, year_mask=year_mask, save_path=save_path)
