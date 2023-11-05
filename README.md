@@ -1,14 +1,15 @@
 MPH Dissertation
+### Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and
+Cardiovascular Disease Mortality.
+
 ======
 by Wei-Jan, Chang (weijan.chang@gmail.com)
 
 * Pipeline for Dissertation in Master of Public Health
 
-Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and
-Cardiovascular Disease Mortality.
 
-Download raw data from open access database:
-
+Step 1:
+        Download raw data from open access database
         a. WHO Mortality database
         https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases
         b. WHO The Global Health Observatory
