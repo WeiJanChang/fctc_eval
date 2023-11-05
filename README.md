@@ -1,5 +1,5 @@
 MPH Dissertation
-### Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and
+# Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and
 Cardiovascular Disease Mortality.
 
 ======
