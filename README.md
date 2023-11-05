@@ -7,9 +7,7 @@ by Wei-Jan, Chang (weijan.chang@gmail.com)
 Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and
 Cardiovascular Disease Mortality.
 
-Step 1:
-
-        Download raw data from open access database
+Download raw data from open access database:
         a. WHO Mortality database
         https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases
         b. WHO The Global Health Observatory
