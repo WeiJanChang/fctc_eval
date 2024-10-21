@@ -5,6 +5,7 @@ Step 1: select 19 countries ratified in WHO FCTC after acknowledging the year wi
 from pathlib import Path
 from typing import Optional, List, Union
 import pandas as pd
+from selected_countries import selected_19_countries
 
 PathLike = Union[Path, str]
 __all__ = ['consistent_year', 'select_ratified_country']
@@ -41,9 +42,6 @@ def select_ratified_country(df: pd.DataFrame, output_path: PathLike = None) -> p
     count_df = interval_df['Country Name'].value_counts().to_frame()
     count_df.columns = ['count']  # choose the most datapoint of countries
     df = interval_df.copy()
-    selected_19_countries = ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain',
-                             'Singapore', 'Latvia', 'Germany', 'Guatemala', 'Kazakhstan', 'Austria', 'Serbia',
-                             'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius', ]
     selected_19_df = df[df.isin(selected_19_countries).any(axis=1)].dropna(how='all')
 
     if output_path is not None:
