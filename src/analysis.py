@@ -1,82 +1,17 @@
 """
 pipeline
 
-Research Questions:
-    i. Is there a relationship between the prevalence of tobacco use and CVD mortality before and after the
-    implementation of a tobacco treaty in WHO FCTC ratified countries?
+Plot the relationship
 
-    ii. Is there a relationship between tobacco associated CVD, in terms of mortality and morbidity, and gender,
-    pre and post implementation of FCTC?
-
-Step 1: select 19 countries ratified in WHO FCTC
-Step 2: select the year which countries ratified the treaty and compare CVD mortality in before and after the treaty
-Step 3: Use statistical method to analysis
-        i) Interrupted Time Series Analysis
-
-        This method can be used to assess the impact of an intervention (WHO FCTC) on causal relationships,
-        including analyzing trends in epidemiological indicators (Prevalence of Tobacco Use and CVD mortality)
-        before and after the intervention.
-
-        Note:
-            When setting the lag parameter in Autocorrelation analysis, it's important to make sure that the
-            lag intervals are consistent with the time intervals of your data.
-        Step 1:
-            Exclude year 2018, 2019
-
-
-        ii) Correlation Analysis
-
-        This method can be used to evaluate the correlation between smoking rates and CVD mortality,
-        as well as whether the intervention (WHO FCTC) has changed this relationship.
-
-        iii) Multivariate Regression Analysis
-
-        This method can be used to evaluate complex interactions between smoking, gender, and CVD mortality,
-        including the impact of the intervention (WHO FCTC) on the relationships between these factors.
 """
 import os
 from pathlib import Path
 from typing import Optional, List, Union
 import matplotlib.pyplot as plt
 import pandas as pd
+from preprocess_analysis import select_ratified_country
 
 PathLike = Union[Path, str]
-
-
-def consistent_year(df: pd.DataFrame,
-                    year_mask: Optional[List[int]] = None,
-                    save_path: Optional[Path] = None) -> pd.DataFrame:
-    """
-    :param df: WHOFCTC_Parties_date_no_missingdata.xlsx
-    :param year_mask: as Time Series, the Year should have regular interval.
-    and now the year includes 2000, 2005, 2010, 2015, 2018, 2019, and 2020. So, the year 2018 and 2019 should be excluded.
-    :param save_path: save modified dataframe to another excel
-    :return: interval_df
-    """
-    interval_df = df.copy()
-    if year_mask is not None:
-        mask = ~interval_df['Year'].isin([2018, 2019])  # create boolean mask to exclude rows with 2018 and 2019
-        interval_df = interval_df[mask]  # select rows that are not excluded by the mask
-    interval_df = interval_df.reset_index(drop=True)
-    if save_path is not None:
-        interval_df.to_excel(save_path)
-    return interval_df
-
-
-def select_ratified_country(df: pd.DataFrame, output_path: PathLike = None) -> pd.DataFrame:
-    interval_df = consistent_year(df, year_mask=[2018, 2019])
-    count_df = interval_df['Country Name'].value_counts().to_frame()
-    count_df.columns = ['count']  # choose the most datapoint of countries
-    df = interval_df.copy()
-    selected_19_countries = ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain',
-                             'Singapore', 'Latvia', 'Germany', 'Guatemala', 'Kazakhstan', 'Austria', 'Serbia',
-                             'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius', ]
-    selected_19_df = df[df.isin(selected_19_countries).any(axis=1)].dropna(how='all')
-
-    if output_path is not None:
-        selected_19_df.to_excel(output_path, index=False)
-    return selected_19_df
-
 
 def plot_relationship(df: pd.DataFrame,
                       select_country: Optional[List[str]] = None,
