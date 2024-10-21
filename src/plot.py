@@ -9,9 +9,11 @@ from pathlib import Path
 from typing import Optional, List, Union
 import matplotlib.pyplot as plt
 import pandas as pd
+from selected_countries import selected_19_countries
 from preprocess_analysis import select_ratified_country
 
 PathLike = Union[Path, str]
+
 
 def plot_relationship(df: pd.DataFrame,
                       select_country: Optional[List[str]] = None,
@@ -69,4 +71,71 @@ def plot_relationship(df: pd.DataFrame,
                 if not os.path.exists(os.path.dirname(save_path)):
                     os.makedirs(os.path.dirname(save_path))
                 fig.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.show()
+
+
+def plot_agegroup(df: pd.DataFrame, dir_path: PathLike):
+    """
+    picture whether Age group affect CVD mortality
+
+    :param df:
+    :return:
+    """
+
+    cvd = pd.read_excel(dir_path / 'WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
+    select_19_countries = cvd[cvd['Country Name'].isin(selected_19_countries)].dropna(how='all')
+    desired_years = [2000, 2005, 2010, 2015, 2020]
+    filtered_df = select_19_countries[select_19_countries['Year'].isin(desired_years)]
+    filtered_df.to_excel(dir_path / 'WithoutAgeGrouping.xlsx')
+
+    # build line chart
+    countries = filtered_df['Country Name'].unique()
+
+    for country in countries:
+        country_data = filtered_df[filtered_df['Country Name'] == country]
+
+        male_data = country_data[country_data['Sex'] == 'Male'].reset_index(drop=True)
+        female_data = country_data[country_data['Sex'] == 'Female'].reset_index(drop=True)
+        all_data = country_data[country_data['Sex'] == 'All'].reset_index(drop=True)
+
+        # Male
+        plt.figure()
+        plt.title(country + ' - Male')
+        for year in [2000, 2005, 2010, 2015, 2020]:
+            year_data = male_data[male_data['Year'] == year]
+            plt.plot(year_data['Age Group'], year_data['Percentage of cause-specific deaths out of total deaths'],
+                     label=str(year))
+
+        plt.xlabel('Age Group')
+        plt.ylabel('Cardiovascular disease mortality (%)')
+
+        plt.legend()
+        plt.show()
+
+        # Female
+        plt.figure()
+        plt.title(country + ' - Female')
+        for year in [2000, 2005, 2010, 2015, 2020]:
+            year_data = female_data[female_data['Year'] == year]
+            plt.plot(year_data['Age Group'], year_data['Percentage of cause-specific deaths out of total deaths'],
+                     label=str(year))
+
+        plt.xlabel('Age Group')
+        plt.ylabel('Cardiovascular disease mortality (%)')
+
+        plt.legend()
+        plt.show()
+
+        # All gender
+        plt.figure()
+        plt.title(country + ' - Both gender')
+        for year in [2000, 2005, 2010, 2015, 2020]:
+            year_data = all_data[all_data['Year'] == year]
+            plt.plot(year_data['Age Group'], year_data['Percentage of cause-specific deaths out of total deaths'],
+                     label=str(year))
+
+        plt.xlabel('Age Group')
+        plt.ylabel('Cardiovascular disease mortality (%)')
+
+        plt.legend()
         plt.show()
