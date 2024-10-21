@@ -1,18 +1,12 @@
 """
 pipeline
 
-Dissertation:
-    To compare the relationship between the Prevalence of Tobacco Use and Cardiovascular Disease mortality before and
-    after the implementation of a tobacco treaty in World Health Organization Framework Convention on Tobacco Control
-    ratified parties and additionally whether there were gender differences
-
 Research Questions:
     i. Is there a relationship between the prevalence of tobacco use and CVD mortality before and after the
     implementation of a tobacco treaty in WHO FCTC ratified countries?
 
     ii. Is there a relationship between tobacco associated CVD, in terms of mortality and morbidity, and gender,
     pre and post implementation of FCTC?
-
 
 Step 1: select 19 countries ratified in WHO FCTC
 Step 2: select the year which countries ratified the treaty and compare CVD mortality in before and after the treaty
@@ -30,7 +24,6 @@ Step 3: Use statistical method to analysis
             Exclude year 2018, 2019
 
 
-
         ii) Correlation Analysis
 
         This method can be used to evaluate the correlation between smoking rates and CVD mortality,
@@ -43,12 +36,11 @@ Step 3: Use statistical method to analysis
 """
 import os
 from pathlib import Path
-from typing import Optional, List
-
+from typing import Optional, List, Union
 import matplotlib.pyplot as plt
 import pandas as pd
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
+
+PathLike = Union[Path, str]
 
 
 def consistent_year(df: pd.DataFrame,
@@ -71,6 +63,21 @@ def consistent_year(df: pd.DataFrame,
     return interval_df
 
 
+def select_ratified_country(df: pd.DataFrame, output_path: PathLike = None) -> pd.DataFrame:
+    interval_df = consistent_year(df, year_mask=[2018, 2019])
+    count_df = interval_df['Country Name'].value_counts().to_frame()
+    count_df.columns = ['count']  # choose the most datapoint of countries
+    df = interval_df.copy()
+    selected_19_countries = ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain',
+                             'Singapore', 'Latvia', 'Germany', 'Guatemala', 'Kazakhstan', 'Austria', 'Serbia',
+                             'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius', ]
+    selected_19_df = df[df.isin(selected_19_countries).any(axis=1)].dropna(how='all')
+
+    if output_path is not None:
+        selected_19_df.to_excel(output_path, index=False)
+    return selected_19_df
+
+
 def plot_relationship(df: pd.DataFrame,
                       select_country: Optional[List[str]] = None,
                       variable_1: Optional[str] = None,
@@ -80,6 +87,21 @@ def plot_relationship(df: pd.DataFrame,
                       x_label: Optional[str] = None,
                       y_label: Optional[str] = None,
                       save_path: Optional[str] = None) -> None:
+    """
+
+    :param df: selected_19_df
+    :param select_country: df['Country Name'].unique()
+    :param variable_1: 'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+    :param variable_2: 'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+    :param variable_3: 'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+    :param variable_4: 'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+    :param x_label: 'Year'
+    :param y_label:
+    :param save_path: output path
+    :return:
+    """
+    selected_19_df = select_ratified_country(df)
+    df = selected_19_df.copy()
     # convert 'Year' column to string type
     df['Year'] = df['Year'].astype(str)
     # filter by selected countries
@@ -113,38 +135,3 @@ def plot_relationship(df: pd.DataFrame,
                     os.makedirs(os.path.dirname(save_path))
                 fig.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.show()
-
-
-if __name__ == '__main__':
-    interval_df = pd.read_excel(
-        "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_date_no_missingdata.xlsx")
-    year_mask = 2018, 2019
-    save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHOFCTC_Parties_2000-2020,5yrs interval.xlsx'
-    new_df = consistent_year(interval_df, year_mask=year_mask, save_path=save_path)
-
-    count_df = new_df['Country Name'].value_counts().to_frame()
-    count_df.columns = ['count']
-    count_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/count_country_.xlsx")
-    result_df = new_df[new_df.isin(
-        ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia',
-         'Germany',
-         'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
-         ]).any(axis=1)].dropna(how='all')
-
-    result_df.to_excel("/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_ratified_country.xlsx")
-
-    plt_df = pd.read_excel(
-        "/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/19_ratified_country.xlsx")
-    select_country = plt_df['Country Name'].unique()
-    variable_1 = 'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
-    variable_2 = 'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
-    variable_3 = 'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
-    variable_4 = 'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
-    x_label = 'Year'
-
-    plot_relationship(plt_df, select_country=select_country,
-                      variable_1=variable_1,
-                      variable_2=variable_2,
-                      variable_3=variable_3,
-                      variable_4=variable_4,
-                      x_label=x_label)
