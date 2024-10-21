@@ -288,29 +288,3 @@ if __name__ == '__main__':
     cvd_tobacco = cvd_tobacco.dropna(axis=0)
     cvd_tobacco.to_excel(
         '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_cvd_tobacco.xlsx')
-
-    # merge parties date
-    who_tobacco_member = pd.read_excel(
-        '/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/WHOFCTC_Parties_date_formatted.xlsx',
-        engine='openpyxl')
-
-    signed_df = pd.merge(cvd_tobacco, who_tobacco_member, on=['Country Name'], how='outer')
-    signed_df.fillna(value='NaN', inplace=True)
-    # drop_missing_data
-    signed_df.replace("NaN", np.nan, inplace=True)
-    signed_df = signed_df.dropna(axis=0)
-    signed_df.to_excel('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/test_signed_member.xlsx')
-
-    # 19 countries selected
-
-    result_df = signed_df[signed_df.isin(
-        ['Estonia', 'Costa Rica', 'Mexico', 'Czechia', 'Netherlands', 'Georgia', 'Spain', 'Singapore', 'Latvia',
-         'Germany',
-         'Guatemala', 'Kazakhstan', 'Austria', 'Serbia', 'Lithuania', 'Ecuador', 'Iceland', 'Slovenia', 'Mauritius',
-         ]).any(axis=1)].dropna(how='all')
-
-    result_df.to_excel("/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest.xlsx")
-
-    year_mask = [2018, 2019]
-    save_path = Path('/Users/wei/Documents/UCD_MPH/mph_lecture/mph_dissertation/data/19_finaltest,5yrs interval.xlsx')
-    new_df = consistent_year(result_df, year_mask=year_mask, save_path=save_path)
