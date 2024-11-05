@@ -88,9 +88,12 @@ def merge_df(df1: pd.DataFrame, df2: pd.DataFrame, drop_na: bool = False,
              merge_output: PathLike = None) -> pd.DataFrame:
     """
 
-    :param df: df1-cvd_tobacco_nomissingdata.xlsx; df2-WHOFCTC_Parties_date_formatted.xlsx
-    :param merge_output:
-    :return:
+
+    :param df1: cvd_tobacco_nomissingdata.xlsx
+    :param df2: WHOFCTC_Parties_date_formatted.xlsx
+    :param drop_na: drop na
+    :param merge_output: output path
+    :return:df
     """
 
     signed_df = pd.merge(df1, df2, on=['Country Name'], how='outer')
