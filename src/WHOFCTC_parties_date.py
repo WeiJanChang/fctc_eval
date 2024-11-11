@@ -4,7 +4,7 @@ pipeline
 Step 1:
         Download signature and ratification of FCTC raw data from UN
         https://treaties.un.org/pages/ViewDetails.aspx?src=TREATY&mtdsg_no=IX-4&chapter=9&clang=_en
-Step 2:
+Step 2
         format date 'dd/mm/yy'
         header:['Country Name', 'Signature', 'Ratification']
         **188 (188, 3)**
