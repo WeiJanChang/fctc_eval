@@ -5,11 +5,8 @@ by Wei-Jan, Chang (weijan.chang@gmail.com)
 
 
 * Download raw data from open access database:
-  
-        a. WHO Mortality database
-        https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases
-        b. WHO The Global Health Observatory
-        https://www.who.int/data/gho/data/themes/topics/sdg-target-3_a-tobacco-control
+  * [WHO Mortality Database](https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases)
+  * [WHO The Global Health Observatory](https://www.who.int/data/gho/data/themes/topics/sdg-target-3_a-tobacco-control)
 * Pipeline for MPH dissertation analysis
 
 
@@ -17,9 +14,9 @@ by Wei-Jan, Chang (weijan.chang@gmail.com)
 ### Installations
 
 
-Download and install Git: https://git-scm.com/downloads
+Download and install [Git](https://git-scm.com/downloads)
 
-Download and install Python: https://www.python.org/downloads/
+Download and install [Python](https://www.python.org/downloads/)
 
 Module used for data visualization and analysis
 =====
