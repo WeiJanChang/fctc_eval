@@ -1,20 +1,15 @@
 """
 pipeline
-
 Step 1:
         Download signature and ratification of FCTC raw data from UN
-        https://treaties.un.org/pages/ViewDetails.aspx?src=TREATY&mtdsg_no=IX-4&chapter=9&clang=_en
-Step 2
+Step 2:
         format date 'dd/mm/yy'
-        header:['Country Name', 'Signature', 'Ratification']
-        **188 (188, 3)**
+        column renamed ['Country Name', 'Signature', 'Ratification']
 Step 3:
-        merge WHOFCTC_Parties_date_formatted.xlsx (n=188) and merge_cvd_tobacco.xlsx (n=89)
+        merge WHOFCTC_Parties_date_formatted df and all_df
         drop_missing_data
-        **82 (424, 22)**
 step 4 :
         mask non-ratified parties
-        **78 (400, 22)**
 """
 
 import pandas as pd
@@ -30,8 +25,7 @@ def format_date(df: pd.DataFrame,
                 formatted_date: Optional[List[str]] = None,
                 save_path: Optional[Path] = None) -> pd.DataFrame:
     """
-
-    :param df: Signatures and Ratifications- UN Treaty Section_08 Feb_2023_Name chnaged.xlsx
+    :param df: Signatures and Ratifications- UN Treaty Section_08 Feb_2023 data
     :param rename_mapping: {
     'Participant': 'Country Name',
     "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'
@@ -60,8 +54,7 @@ def final_selected(df: pd.DataFrame,
                    save_path: Optional[Path] = None,
                    drop_na: Optional[List[str]] = None, ) -> pd.DataFrame:
     """
-
-    :param df:merge_cvd_tobacco.xlsx
+    :param df: all_df
     :param column_drop: drop cigarette_smoking
     :param save_path:save modified dataframe to another excel
     :param drop_na: if na in the df
@@ -79,16 +72,14 @@ def final_selected(df: pd.DataFrame,
             raise ValueError(f'{e} not in the dataframe, should be one of the {df.columns.tolist()}')  # If
             # typed wrong, show the list which should be dropped.
     if save_path is not None:
-        df.to_excel(save_path)
+        df.to_excel(save_path, index=False)
 
     return df
 
 
-def merge_df(df1: pd.DataFrame, df2: pd.DataFrame, drop_na: bool = False,
-             merge_output: PathLike = None) -> pd.DataFrame:
+def merge_fctc_df(df1: pd.DataFrame, df2: pd.DataFrame, drop_na: bool = False,
+                  merge_output: PathLike = None) -> pd.DataFrame:
     """
-
-
     :param df1: cvd_tobacco_nomissingdata.xlsx
     :param df2: WHOFCTC_Parties_date_formatted.xlsx
     :param drop_na: drop na
