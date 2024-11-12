@@ -139,3 +139,4 @@ def plot_agegroup(df: pd.DataFrame, dir_path: PathLike):
 
         plt.legend()
         plt.show()
+# todo: test these code and present it on readme
