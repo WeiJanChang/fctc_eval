@@ -1,128 +1,30 @@
 """
 pipeline
 
-Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and
-Cardiovascular Disease Mortality.
+Step 1 Cleaning the WHO CVD mortality data:
+- column drop: ['Age group code', 'Unnamed: 12', 'Age-standardized death rate per 100 000 standard population']
+- drop na: ['Number','Percentage of cause-specific deaths out of total deaths', 'Death rate per 100 000 population']
 
-Step 1:
+Step 2 preprocess the WHO CVD mortality data:
+- Calculate Total number of death
+- only left age >15 years old
 
-        Download raw data from open access database
-        a. df1 = WHO Mortality database
-        https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases
-        b. df2 = WHO The Global Health Observatory
-        https://www.who.int/data/gho/data/themes/topics/sdg-target-3_a-tobacco-control
+Step 3 preprocess the WHO CVD mortality data:
+- Calculate 'Total Number of Cause-Specific Deaths'
+    - formula: Total Number of Cause-Specific Deaths=Numbers* 100/Percentage of cause-specific deaths out of total deaths
+- Calculate 'Total Percentage of Cause-Specific Deaths Out Of Total Deaths'
+    - formula: Number of Cause-Specific Deaths/ Total Number of Cause-Specific Deaths * 100'
+    (All/Females/Males in each year and country; no age-specific)
+- Grouping age
+- change layout
 
-Step 2:
+Step 4 preprocess the Tobacco data:
+- raname column name, use select_df function
+- {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
+- change layout
 
-        select df1 the info I need and drop info I don't need. drop na from the remaining column. save it to
-        modified_df save_path: '/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH
-        Dissertation/Data/WHO_Cardiovascular_Disease_Mortality_Database.xlsx'
-
-        df1 (raw data): ['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex', 'Age group
-        code', 'Age Group', 'Number', 'Percentage of cause-specific deaths out of total deaths', 'Age-standardized
-        death rate per 100 000 standard population', 'Death rate per 100 000 population', 'Unnamed: 12']
-        **114 (297066, 13)**
-
-        df1 (after select): ['Region Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'Sex',
-        'Age Group', 'Number', 'Percentage of cause-specific deaths out of total deaths', 'Age-standardized death
-        rate per 100 000 standard population', 'Death rate per 100 000 population']
-        **111 (111401, 11)**
-
-Step 3:
-
-        To do some calculations on df1
-        mask age <15
-
-Step 4:
-
-        df1: Calculate 'Total Number of Cause-Specific Deaths' formula: Total Number of Cause-Specific Deaths=Numbers
-        * 100/Percentage of cause-specific deaths out of total deaths
-
-Step 5:
-
-        df1: calculate 'Total Percentage of Cause-Specific Deaths Out Of Total Deaths' = Number of Cause-Specific
-        Deaths/ Total Number of Cause-Specific Deaths * 100' (All/Females/Males in each year and country; no
-        age-specific)
-
-Step 6:
-        df1: age grouping: each age groups --> one age group (>= 15 y/o) create a new df: groupby ['Region Code',
-        'Region Name','Country Code','Country Name', 'Year'] and added new col: ['Number'], ['Total Number of
-        Cause-Specific Deaths'],['Total Percentage of Cause-Specific Deaths Out Of Total Deaths'] change layout.
-        Sex (All, Female, and Male) combined to header(Number/ Tot Num/ Tot %) respectively Left only a unique year
-        in col.
-        save it to excel
-        save_path = ('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH
-        Dissertation/Data/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
-
-Step 7:
-
-        After previous steps df1(CVD Mortality): Header:['Region Code', 'Region Name', 'Country Code',
-        'Country Name', 'Year', 'All_Number', 'Female_Number', 'Male_Number',
-        'All_Total_Number_of_Cause_Specific_Deaths' , 'Female_Total_Number_of_Cause_Specific_Deaths',
-        'Male_Total_Number_of_Cause_Specific_Deaths',
-        'All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'] **98 (1670, 14)**
-
-Step 8:
-
-        select df2 the info I need and rename the header
-        df2(raw data): ['Location', 'Period', 'Indicator', 'Dim1', 'First Tooltip']
-        **165 (9351, 5)**
-
-        df2 (after select and rename):['Country Name', 'Year', 'Indicator', 'Sex', 'Prevalence']
-        **165 (9351, 5)**
-
-Step 9:
-
-        change tobacco use layout df2: ['Country Name', 'Year',
-        'All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-        'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-        'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate']
-        **165 (1477, 11)**
-
-Step 10:
-        merge df1 and df2
-
-        df1(CVD Mortality):
-        Header:['Region Code', 'Region Name', 'Country Code', 'Country Name',
-        'Year', 'All_Number', 'Female_Number', 'Male_Number', 'All_Total_Number_of_Cause_Specific_Deaths',
-        'Female_Total_Number_of_Cause_Specific_Deaths', 'Male_Total_Number_of_Cause_Specific_Deaths',
-        'All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths']
-        **111 (1670, 14)**
-
-        df2(Tobacco): Header:
-        ['Country Name', 'Year', 'All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-        'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-        'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate']
-        **165 (1477, 11)**
-
-        merge them based on Country Name and Year,show NaN if some values are empty, don't drop header:['Region
-        Code', 'Region Name', 'Country Code', 'Country Name', 'Year', 'All_Number', 'Female_Number', 'Male_Number',
-        'All_Total_Number_of_Cause_Specific_Deaths', 'Female_Total_Number_of_Cause_Specific_Deaths',
-        'Male_Total_Number_of_Cause_Specific_Deaths',
-        'All_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
-        'All_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate',
-        'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-        'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-        'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate']
-        **185 (2895, 23)**
-
-        save it to excel save_path('/Users/wei/UCD-MPH/MPH-Lecture:Modules/MPH Dissertation/
-        Data/merge_cvd_tobacco.xlsx')
-
+Step 5 merge CVD df and tobacco df:
+- merge them based on Country Name and Year,show NaN if some values are empty
 """
 
 from pathlib import Path  # pathlib: module, Path: class. Checking if a path exist
@@ -134,7 +36,11 @@ from pprint import pprint  # pprint.pprint() can use when you need to examine th
 # data structure. this output reveals more readable and structured way.
 from who_member_states import WHO_MEMBER_STATES
 
-__all__ = ['select_df']  # only import 'select_df'
+__all__ = ['select_df',
+           'preprocess_cvd',
+           'create_age_grouping',
+           'tobacco_layout_modified',
+           'merge_df']
 
 
 # test data should <10 MB
@@ -185,7 +91,7 @@ def select_df(df: pd.DataFrame,
             raise ValueError(f'{e} not in the dataframe, should be one of the {modified_df.columns.tolist()}')  # If
             # typed wrong, show the list which should be dropped.
     if save_path is not None:
-        modified_df.to_excel(save_path)
+        modified_df.to_excel(save_path, index=False)
 
     return modified_df
 
@@ -225,17 +131,18 @@ def preprocess_cvd(df: pd.DataFrame,
         df.dropna(subset=['Age Group'], inplace=True)
 
     if save_path is not None:
-        df.to_excel(save_path)
+        df.to_excel(save_path, index=False)
     return df
 
 
 def create_age_grouping(df: pd.DataFrame,
                         save_path: Optional[Path] = None) -> pd.DataFrame:
     """
-    Calculate: Total percentage of CVD of total deaths = Sum of CVD death number/ Sum of Total number of deaths
+    1. Calculate: Total percentage of CVD of total deaths = Sum of CVD death number/ Sum of Total number of deaths
     * 100 (Male/ Female/ All in each year and country)
-    grouping_age: Age groups --> one age group (greater 15 y/o)
-    create a new df and save it to excel
+    2. grouping_age: Age groups --> one age group (greater 15 y/o)
+    3. change layout
+    4. create a new df and save it to excel
 
     :param df: df after select_df and preprocess_cvd
     :param save: save modified dataframe to another excel
@@ -295,13 +202,20 @@ def create_age_grouping(df: pd.DataFrame,
     new_df = new_df.groupby(['Country Name', 'Year']).first().reset_index()  # The first method is then applied to
     # the grouped dataframe, which returns the first row of each group
     if save_path:
-        new_df.to_excel(save_path)
+        new_df.to_excel(save_path, index=False)
     return new_df
 
 
 def tobacco_layout_modified(df: pd.DataFrame,
                             column_drop: Optional[Path] = None,
                             save_path: Optional[Path] = None) -> pd.DataFrame:
+    """
+    run select_df first and then use this function to modify layout
+    :param df:  Prevalence of Tobacco data
+    :param column_drop: drop col
+    :param save_path: path
+    :return: df
+    """
     if column_drop is not None:
         df = df.drop(columns=column_drop)
     dy: dict = collections.defaultdict(list)
@@ -355,77 +269,36 @@ def tobacco_layout_modified(df: pd.DataFrame,
 
     changed_df = changed_df.drop(['Sex', 'Prevalence', 'Indicator'], axis=1)
     changed_df = changed_df.groupby(['Country Name', 'Year']).first().reset_index()
-    print(changed_df)
     if save_path is not None:
-        changed_df.to_excel(save_path)
+        changed_df.to_excel(save_path, index=False)
     return changed_df
 
 
-if __name__ == '__main__':
-    raw_who_cvd_df = pd.read_csv(
-        '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/raw data/WHOMortalityDatabase_Deaths_sex_age_a_country_area_year-Cardiovascular diseases_7th February 2023.csv')
-column_drop = ['Age group code', 'Unnamed: 12', 'Age-standardized death rate per 100 000 standard population']
-na_header = ['Number',
-             'Percentage of cause-specific deaths out of total deaths',
-             'Death rate per 100 000 population']
-save_path = (
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
+def merge_df(cvd_df: pd.DataFrame, tobacco_df: pd.DataFrame, column_name=Optional[List[str]],
+             all_df_out: Optional[Path] = None) -> pd.DataFrame:
+    """
+    merge CVD df and tobacco df based on Country Name and Year
+    :param cvd_df: cvd df
+    :param tobacco_df: tobacco df
+    :param column_name: country name and year
+    :param all_df_out: output path
+    :return: df
+    """
+    all_df = pd.merge(cvd_df, tobacco_df, on=[column_name], how='outer')
+    all_df.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
+    # in df. 'Nan' can be changed what you want to instead of.
 
-who_cvd_df = select_df(raw_who_cvd_df, column_drop=column_drop, drop_na=na_header,
-                       save_path=save_path)
-who_cvd_df = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
-# “xlrd” supports old-style Excel files (.xls).“openpyxl” supports newer Excel file formats.
-drop_na = ['Age Group']
-save_path = (
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
-who_cvd_df_preprocess = preprocess_cvd(who_cvd_df, drop_na=drop_na,
-                                       save_path=save_path)  # assign a who_cvd_df after preprocess_cvd
+    # drop no need indicators in Tobacco dataset
+    columns_to_drop = [
+        'Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+        'Male_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+        'All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
+        'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+        'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
+        'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate'
+    ]
+    all_df = all_df.drop(columns=columns_to_drop)
+    if all_df_out is not None:
+        all_df.to_excel(all_df_out, index=False)
 
-who_cvd_df_preprocess = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/WHO_Cardiovascular_Disease_Mortality_Database_preprocess.xlsx')
-
-save_path = (
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/new_WHO_Cardiovascular_Disease_Mortality_Database.xlsx')
-new_df = create_age_grouping(who_cvd_df_preprocess, save_path=save_path)
-
-raw_tobacco_df = pd.read_csv(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/raw data/Estimate of current tobacco smoking prevalence(%)(age-standardized rate)_17 Jan 2022.csv')
-
-rename = {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
-
-save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/Prevalence of Tobacco use_modified.xlsx'
-tobacco_df = select_df(raw_tobacco_df, rename_mapping=rename, save_path=save_path)
-
-tobacco_df = pd.read_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/Prevalence of Tobacco use_modified.xlsx')
-save_path = '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/Prevalence of Tobacco use_Changed_layout.xlsx'
-changed_df = tobacco_layout_modified(tobacco_df, save_path=save_path)
-
-# merge df1 & df2 test
-df1 = new_df
-df2 = changed_df
-
-cvd_tobacco = pd.merge(df1, df2, on=['Country Name', 'Year'], how='outer')
-cvd_tobacco.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
-# in df. 'Nan' can changed what you want to instead of.
-cvd_tobacco.to_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/merge_cvd_tobacco.xlsx')
-
-# drop no need indicators in Tobacco dataset
-columns_to_drop = [
-    'Female_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
-    'Male_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
-    'All_Estimate_of_current_cigarette_smoking_prevalence_age_standardized_rate',
-    'Female_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-    'Male_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate',
-    'All_Estimate_of_Current_Tobacco_Smoking_Prevalence_age_standardized_rate'
-]
-cvd_tobacco = cvd_tobacco.drop(columns=columns_to_drop)
-cvd_tobacco.to_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/merge_cvd_tobacco.xlsx')
-# drop NaN
-cvd_tobacco.replace('NaN', np.nan, inplace=True)
-cvd_tobacco = cvd_tobacco.dropna(axis=0)
-cvd_tobacco.to_excel(
-    '/Users/wei/UCD-MPH/MPH Lecture/MPH Dissertation/Data (WHO CVD and Tobacco Use)/cvd_tobacco_nomissingdata.xlsx')
+    return all_df
