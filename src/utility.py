@@ -302,3 +302,23 @@ def merge_df(cvd_df: pd.DataFrame, tobacco_df: pd.DataFrame, column_name=Optiona
         all_df.to_excel(all_df_out, index=False)
 
     return all_df
+
+
+def consistent_year(df: pd.DataFrame,
+                    year_mask: Optional[List[int]] = None,
+                    save_path: Optional[Path] = None) -> pd.DataFrame:
+    """
+    :param df: WHOFCTC_Parties_date_no_missingdata.xlsx
+    :param year_mask: as Time Series, the Year should have regular interval.
+    and now the year includes 2000, 2005, 2010, 2015, 2018, 2019, and 2020. So, the year 2018 and 2019 should be excluded.
+    :param save_path: save modified dataframe to another excel
+    :return: interval_df
+    """
+    interval_df = df.copy()
+    if year_mask is not None:
+        mask = ~interval_df['Year'].isin([2018, 2019])  # create boolean mask to exclude rows with 2018 and 2019
+        interval_df = interval_df[mask]  # select rows that are not excluded by the mask
+    interval_df = interval_df.reset_index(drop=True)
+    if save_path is not None:
+        interval_df.to_excel(save_path)
+    return interval_df
