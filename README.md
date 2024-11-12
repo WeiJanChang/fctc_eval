@@ -1,6 +1,6 @@
 Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and Cardiovascular Disease Mortality.
 ===
-by [Wei Jan, Chang](weijan.chang@gmail.com)
+by [Wei Jan, Chang](mailto:weijan.chang@gmail.com)
 
 # Data Source
 
@@ -8,6 +8,7 @@ Download raw data from open access database:
 
 * [WHO Mortality Database](https://platform.who.int/mortality/themes/theme-details/topics/topic-details/MDB/cardiovascular-diseases)
 * [WHO The Global Health Observatory](https://www.who.int/data/gho/data/themes/topics/sdg-target-3_a-tobacco-control)
+* [Signature and Ratification of FCTC from UN](https://treaties.un.org/pages/ViewDetails.aspx?src=TREATY&mtdsg_no=IX-4&chapter=9&clang=_en)
 
 # Installation
 
@@ -35,23 +36,28 @@ cd src
 
 `from utility import select_df`
 
-## preprocess the WHO CVD mortality data
+## Preprocess the WHO CVD mortality data
 
 `from utility import preprocess_cvd, create_age_grouping`
 
-## Module used for data visualization and analysis
+## Preprocess the Prevalence of Tobacco Use data
 
-## masking
+run cleaning process first and `from utility import tobacco_layout_modified`
 
-- `utility.py`:
+## Merge CVD df and tobacco df
 
-## ratified date
+`from utility import tobacco_layout_modified`
 
-- `WHOFCTC_parties_date.py`:
+## Determine countries who signed the WHO FCTC treaty
 
-## analysis
+`WHOFCTC_parties_date.py`
 
-- `analysis.py`
+# Data visualization
 
-How to run the main script?
-=====
+## Preprocess
+
+`preprocess_analysis.py`
+
+## create figures
+
+`ploy.py`
