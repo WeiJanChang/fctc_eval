@@ -38,10 +38,7 @@ def format_date(df: pd.DataFrame,
         df = df.rename(columns=rename_mapping)
     if formatted_date is not None:
         for col in formatted_date:
-            # df[col] = pd.to_datetime(df[col], infer_datetime_format=True)
-            # df[col] = pd.to_datetime(df[col].dt.strftime("%d %b %Y").dt.strftime("%Y"))
-            df[col] = pd.to_datetime(df[col], infer_datetime_format=True).dt.strftime("%d %b %Y").str.extract(
-                r'(\d{4})')
+            df[col] = pd.to_datetime(df[col], dayfirst=True, errors='coerce').dt.year.astype(str).fillna("Nan")
 
     df.fillna(value='Nan', inplace=True)
     if save_path is not None:
@@ -97,3 +94,13 @@ def merge_fctc_df(df1: pd.DataFrame, df2: pd.DataFrame, drop_na: bool = False,
         signed_df.to_excel('WHOFCTC_Parties_signed_date.xlsx', index=False)
 
     return signed_df
+
+
+if __name__ == '__main__':
+    df = pd.read_excel(
+        "/Users/wj/code/fctc_eval/test_file/Signatures and Ratifications- UN Treaty Section_08 Feb_2023.xlsx")
+    df = format_date(df, rename_mapping={
+        'Participant': 'Country Name',
+        "Ratification, Acceptance(A), Approval(AA), Formal confirmation(c), Accession(a), Succession(d)": 'Ratification'
+    }, formatted_date=['Signature', 'Ratification'])
+    print(df)
