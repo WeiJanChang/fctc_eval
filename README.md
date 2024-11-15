@@ -34,17 +34,26 @@ cd src
 
 ## Cleaning process
 
+- Cleans the mortality dataframe by removing specified columns and filtering rows with missing values
+
 `from utility import select_df`
 
 ## Preprocess the WHO CVD mortality data
+
+- Prepares and filters cardiovascular disease data
+- Groups data into specific age categories
 
 `from utility import preprocess_cvd, create_age_grouping`
 
 ## Preprocess the Prevalence of Tobacco Use data
 
-run cleaning process first and `from utility import tobacco_layout_modified`
+- Formats the tobacco data for merging
+
+`from utility import tobacco_layout_modified`
 
 ## Merge CVD df and tobacco df
+
+- Merges CVD and tobacco data by country
 
 `from utility import tobacco_layout_modified`
 

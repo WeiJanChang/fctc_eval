@@ -19,7 +19,7 @@ Step 3 preprocess the WHO CVD mortality data:
 - change layout
 
 Step 4 preprocess the Tobacco data:
-- raname column name, use select_df function
+- raname column name
 - {'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'}
 - change layout
 
@@ -216,6 +216,8 @@ def tobacco_layout_modified(df: pd.DataFrame,
     :param save_path: path
     :return: df
     """
+    df = df.copy()
+    df = df.rename(columns={'Location': 'Country Name', 'Period': 'Year', 'Dim1': 'Sex', 'First Tooltip': 'Prevalence'})
     if column_drop is not None:
         df = df.drop(columns=column_drop)
     dy: dict = collections.defaultdict(list)
@@ -284,7 +286,7 @@ def merge_df(cvd_df: pd.DataFrame, tobacco_df: pd.DataFrame, column_name=Optiona
     :param all_df_out: output path
     :return: df
     """
-    all_df = pd.merge(cvd_df, tobacco_df, on=[column_name], how='outer')
+    all_df = pd.merge(cvd_df, tobacco_df, on=column_name, how='outer')
     all_df.fillna(value='NaN', inplace=True)  # inplace = True means that 'value = 'NaN'' will inplace original value
     # in df. 'Nan' can be changed what you want to instead of.
 
