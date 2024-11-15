@@ -1,6 +1,5 @@
 Assessing the impact of the WHO Framework Convention on Tobacco Control on Prevalence of Tobacco Use and Cardiovascular Disease Mortality.
 ===
-by [Wei Jan, Chang](mailto:weijan.chang@gmail.com)
 
 # Data Source
 
@@ -69,4 +68,8 @@ cd src
 
 ## create figures
 
-`ploy.py`
+`plot.py`
+
+# Contact
+
+[Wei Jan, Chang](mailto:weijan.chang@gmail.com)
