@@ -10,7 +10,7 @@ from typing import Optional, List, Union
 import matplotlib.pyplot as plt
 import pandas as pd
 from selected_countries import selected_19_countries
-from preprocess_analysis import select_ratified_country
+from preprocess_plot import select_ratified_country
 
 PathLike = Union[Path, str]
 
