@@ -70,6 +70,17 @@ cd src
 
 `plot.py`
 
+Example of multi-subplot line chart
+
+```
+df = pd.read_excel('~/test_file/19_ratified_country.xlsx')
+plot_line_chart(df,column1='Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths' ,
+                    column2='Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths',
+                    save_path=[CLONED_DIRECTORY])
+```
+
+![Example of multi-subplot line chart](test_file/multi_subplot_line_chart.png)
+
 # Contact
 
 [Wei Jan, Chang](mailto:weijan.chang@gmail.com)
