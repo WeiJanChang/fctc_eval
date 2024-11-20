@@ -107,7 +107,7 @@ def preprocess_cvd(df: pd.DataFrame,
     - save as another dataframe
 
     :param df: input dataframe (WHO_Cardiovascular_Disease_Mortality_Database.xlsx)
-    :param drop_na: drop Age_Group <15 year-old
+    :param drop_na: drop Age_Group <15-year-old
     :param save_path: save modified dataframe to another excel
     :return: df
     """
