@@ -2,21 +2,16 @@
 pipeline
 
 """
-import os
 from pathlib import Path
-from typing import Union, Tuple
-import matplotlib as mpl
+from typing import Union, Tuple, Optional, List
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from matplotlib.figure import Figure
 
 PathLike = Union[Path, str]
 
 
 def plot_line_chart(df, column1: str, column2: str,
-                    save_path: PathLike = None, nrows=5, ncols=4, figsize=(20, 20), dpi=200) -> Tuple[
-    Figure, np.ndarray]:
+                    save_path: PathLike = True, nrows=5, ncols=4, figsize=(20, 20), dpi=200):
     """
     Plots multi-subplot line chart with CVD Mortality Rates or Prevalence or Tobacco Use for multiple countries with annotations for policy ratification years.
     :param df: test file: 19_ratified_country.xlsx
@@ -99,8 +94,59 @@ def plot_line_chart(df, column1: str, column2: str,
 
     # Adjust layout and save the plot
     plt.tight_layout()
-    if save_path is not None:
+    if save_path:
         plt.savefig(save_path, bbox_inches='tight')
     plt.show()
     plt.close()
-    return fig, axs
+
+
+def relationship_cvd_tobacco(df: pd.DataFrame,
+                             select_country: Optional[List[str]] = None,
+                             variable_1: Optional[str] = None,
+                             variable_2: Optional[str] = None,
+                             variable_3: Optional[str] = None,
+                             variable_4: Optional[str] = None,
+                             save_path: PathLike = True):
+    """
+    Data visualisation between CVD Mortality and Prevalence of Tobacco Use in both Males and Females in each country
+    :param df:test file: 19_ratified_country.xlsx
+    :param select_country: either run all countries or specify the country name.
+     for example, ['Netherlands'] or df['Country Name'].unique()
+    :param variable_1:'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+    :param variable_2:'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+    :param variable_3:'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+    :param variable_4:'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+    :param save_path: output path
+    """
+    # convert 'Year' column to string type
+    df['Year'] = df['Year'].astype(str)
+    # filter by selected countries
+    if select_country is not None:
+        for country in select_country:
+            country_df = df[df['Country Name'] == country]
+            # create a new figure with 2 subplots
+            fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+            # plot variable_1 and variable_2 on the first subplot for males data
+            ax1.plot(country_df['Year'], country_df[variable_1], color='b')
+            ax1.plot(country_df['Year'], country_df[variable_2], color='r')
+            ax1.set_xlabel('Year')
+            ax1.set_ylabel('Prevalence of Tobacco Use & CVD Mortality', color='k')
+            ax1.tick_params(axis='y', labelcolor='k')
+            ax1.legend(['Prevalence of Tobacco Use in Males (%)', 'CVD Mortality in Males (%)'], loc='upper left')
+            # plot variable_3 and variable_4 on the second subplot for females data
+            ax2.plot(country_df['Year'], country_df[variable_3], color='g')
+            ax2.plot(country_df['Year'], country_df[variable_4], color='m')
+            ax2.set_xlabel('Year')
+            ax2.set_ylabel('Prevalence of Tobacco Use & CVD Mortality', color='k')
+            ax2.tick_params(axis='y', labelcolor='k')
+            ax2.legend(['Prevalence of Tobacco Use in Females (%)', 'CVD Mortality in Females (%)'], loc='upper left')
+            # set titles and axis labels for the figure
+            plt.suptitle(f'{country}')
+            plt.xticks(country_df['Year'])
+
+        # Adjust layout and save the plot
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, bbox_inches='tight')
+        plt.show()
+        plt.close()
