@@ -70,7 +70,7 @@ cd src
 
 `plot.py`
 
-Example of multi-subplot line chart
+#### Example 1 of multi-subplot line chart
 
 ```
 df = pd.read_excel('~/test_file/19_ratified_country.xlsx')
@@ -80,6 +80,30 @@ plot_line_chart(df,column1='Male_Total_Percentage_of_Cause_Specific_Deaths_Out_O
 ```
 
 ![Example of multi-subplot line chart](test_file/multi_subplot_line_chart.png)
+
+#### Example 2 of line chart between CVD Mortality and Prevalence of Tobacco Use in both Males and Females in Netherland
+
+```
+df = pd.read_excel('~/test_file/19_ratified_country.xlsx')
+select_country = ['Netherlands']
+male_tobacco = 'Male_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+male_cvd = 'Male_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+female_tobacco = 'Female_Estimate_of_Current_Tobacco_Use_Prevalence_age_standardized_rate'
+female_cvd = 'Female_Total_Percentage_of_Cause_Specific_Deaths_Out_Of_Total_Deaths'
+save_path = "[CLONED_DIRECTORY]/[FIGURE_NAME].png"
+
+relationship_cvd_tobacco(df, select_country=select_country,
+                         variable_1=male_tobacco,
+                         variable_2=male_cvd,
+                         variable_3=female_tobacco,
+                         variable_4=female_cvd, save_path=[CLONED_DIRECTORY]
+                         )
+
+```
+
+![Example 2](test_file/Comparison_in_M_F.png)
+
+# Statistical Analysis
 
 # Contact
 
