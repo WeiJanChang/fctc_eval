@@ -103,8 +103,6 @@ relationship_cvd_tobacco(df, select_country=select_country,
 
 ![Example 2](test_file/Comparison_in_M_F.png)
 
-# Statistical Analysis
-
 # Contact
 
 [Wei Jan, Chang](mailto:weijan.chang@gmail.com)
