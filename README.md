@@ -104,8 +104,8 @@ relationship_cvd_tobacco(df, select_country=select_country,
 ![Example 2](test_file/Comparison_in_M_F.png)
 
 ## Dashboard
-
-Please download the dashboard.pbix file and open it in Power BI
+Demo 
+![Demo](dashboard/usage.gif)
 
 # Contact
 
