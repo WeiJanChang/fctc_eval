@@ -107,6 +107,8 @@ relationship_cvd_tobacco(df, select_country=select_country,
 Demo 
 ![Demo](dashboard/usage.gif)
 
+Please download the [dashboard.pbix](dashboard/dashboard.pbix) file and open it in Power BI.
+
 # Contact
 
 [Wei Jan, Chang](mailto:weijan.chang@gmail.com)
